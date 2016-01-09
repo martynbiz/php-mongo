@@ -1,19 +1,11 @@
 {
-    "name": "martynbiz/php-mongo",
+    "name": "massaman/php-mongo",
     "type": "library",
-    "homepage": "http://github.com/martynbiz/database",
+    "homepage": "http://github.com/massaman/php-mongo",
     "license": "MIT",
-    "authors": [
-        {
-            "name": "Martyn Bissett",
-            "email": "martynbissett@yahoo.co.uk",
-            "homepage": "http://ma.rtyn.biz",
-            "role": "Developer"
-        }
-    ],
     "autoload": {
         "psr-0": {
-            "Mongo": "src"
+            "Massaman": "library"
         }
     },
     "require": {

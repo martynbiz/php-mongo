@@ -1,100 +1,61 @@
-##Installation
+## Installation ##
 
-Install with composer: 
+Install with composer:
 
 ```
-"martynbiz/php-validator": "dev-master"
+"massaman/php-mongo": "*"
 ```
 
-After that, create a new instance of the class.
+After that, setup the connection.
 
 ```php
-$validator = MartynBiz\Validator::getInstance();
+Connection::getInstance()->setOptions(array(
+    'dbname' => 'mydb',
+    'classmap' => array(
+        'users' => '\\App\\Model\\User',
+    ),
+));
 ```
 
-### Chaining
+## Getting started ##
 
-The set() method instructs the object that this is a new value to validate. Additional methods are chained from this. Below shows an example of the object checking a value is not empty, then checking it is a valid email address.
+Create models by extending the Mongo class:
 
-```php
-$email = '';
-$validator->set($email)
-  ->isNotEmpty('Email address is blank')
-  ->isEmail('Invalid email address');
-```
+<?php
 
-To fetch the errors  from a validation check, use getErrors():
+use Massaman\Mongo;
 
-```php
-$errors = $validator->getErrors();
-```
+class User extends mongo
+{
+    protected $collection = 'users';
+}
 
-This will return an array of containing the error that occured (Email address is blank). Please note that although the isEmail method was called too, because it has already gathered an error it does not record another. Remember this when ordering your methods in the chain.
+Find by mongo query
 
-It is also possible to do this in one go, and return errors:
+$users = User::find(array(
+    'status' => 1,
+));
 
-```php
-$email = '';
-$errors = $validator->set($email)
-  ->isNotEmpty('Email address is blank')
-  ->isEmail('Invalid email address')
-  ->getErrors();
-```
+Find one by mongo query
 
-### Other methods for validating
+$user = User::findOne(array(
+    'email' => 'info@examle.com',
+));
 
-The above example shows how to validate an email address but the following methods can be used to numeric, date and time stings too. Below is the full list of validation methods available.
+Setting variables
 
-Not empty or only whitespaces
+$user->name = 'Jim';
+$user->save();
 
-```php
-$validator->set($value)
-  ->isNotEmpty('Value must not be blank');
-  
-$validator->set($value)
-  ->isEmail('Email address must be valid');
-  
-$validator->set($value)
-  ->isLetters('Value must be letters');
-  
-$validator->set($value)
-  ->isNumber('Value must be a number');
-  
-$validator->set($value)
-  ->isPositiveNumber('Value must be a positive number');
-  
-$validator->set($value)
-  ->isNotPositiveNumber('Value must not be a positive number, negatives and zeros OK');
-  
-$validator->set($value)
-  ->isNegativeNumber('Value must be a negative number');
-  
-$validator->set($value)
-  ->isNotNegativeNumber('Value must not be a negative number, positives and zeros OK');
-  
-$validator->set($value)
-  ->isDateTime('Value must be date/time format yyyy-mm-dd hh:mm:ss');
-  
-$validator->set($value)
-  ->isDate('Value must be date format yyyy-mm-dd');
-  
-$validator->set($value)
-  ->isTime('Value must be time hh:mm:ss');
-```
+$user->save(array(
+    'name' => 'Jim',
+));
 
-### Passing error code
+$user->delete();
 
-Perhaps you want to return a numeric value too so your app can identify the error. You can pass a numeric value with the error message and it will be part of the errors array.
+## Todo ##
 
-```php
-$validator->set($value)
-  ->isNotEmpty('Value must not be blank', 2020);
-```
-
-### Other error logging
-
-You can use the logError() method too to log a custom error:
-
-```php
-$validator->logError('Could not load api', 5000);
-```
+* test: methods called statically should also work
+* save
+* sequences
+* mass assignment

@@ -244,6 +244,8 @@ abstract class Mongo
 
 	/**
 	 * Will convert objects to arrays
+ 	 * @param int $deep How deep to recursively convert to arrays
+ 	 * @param mixed $values Used by the class when recursively converting arrays
 	 * @return array
 	 */
 	public function toArray($deep=2, $values=null)

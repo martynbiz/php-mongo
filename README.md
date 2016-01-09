@@ -11,6 +11,8 @@ After that, setup the connection.
 ```php
 Connection::getInstance()->setOptions(array(
     'db' => 'mydb',
+    'username' => 'myuser',
+    'password' => '89dD7HH7di!89',
     'classmap' => array(
         'users' => '\\App\\Model\\User',
     ),

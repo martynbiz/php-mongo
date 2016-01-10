@@ -3,15 +3,7 @@
 namespace Massaman;
 
 /**
- *
- * Designed for string validation (e.g. form submissions). Allows a single value
- * to be checked through a series of conditions through method chaining.
- *
- * @category Mongo
- * @package Mongo
- * @author Martyn Bissett <martynbissett@yahoo.co.uk>
- * @license http://opensource.org/licenses/gpl-3.0.html GNU Public License
- * @version 1.0
+ * Abstract class for creating mongo models
  **/
 
 use Massaman\Mongo\Connection;
@@ -132,6 +124,11 @@ abstract class Mongo
 	{
 		$result = Connection::getInstance()->find($this->collection, $query, $options);
 
+		// if result from find is null, return empty array
+		if (! $result) {
+			return array();
+		}
+
 		// built array of objects
 		$return = array();
 		foreach($result as $data) {
@@ -148,9 +145,14 @@ abstract class Mongo
 	 */
 	public function findOne($query=array(), $options=array())
 	{
-		$data = Connection::getInstance()->findOne($this->collection, $query, $options);
+		$result = Connection::getInstance()->findOne($this->collection, $query, $options);
 
-		return $this->createObjectFromDataArray($data);
+		// if result from findOne is null, return null
+		if (! $result) {
+			return null;
+		}
+
+		return $this->createObjectFromDataArray($result);
 	}
 
 	/**

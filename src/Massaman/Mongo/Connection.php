@@ -2,18 +2,17 @@
 
 namespace Massaman\Mongo;
 
+use Massaman\Mongo\SingletonTrait;
+
 /**
  * This is the mongo db connection singleton instance class. It is only concerned
  * with accessing the mongo db and working with array data, no object creation here
  */
 class Connection
 {
-    /**
-     * @var Singleton The reference to *Singleton* instance of this class
-     */
-    private static $instance;
+    use SingletonTrait;
 
-	/**
+    /**
 	 * @var MongoClient
 	 */
     private $client;
@@ -32,36 +31,43 @@ class Connection
     );
 
     /**
-     * Returns the *Singleton* instance of this class.
-     *
-     * @return Singleton The *Singleton* instance.
-     */
-    public static function getInstance()
-    {
-        if (null === static::$instance) {
-            static::$instance = new static();
+	 * Database can be set here, also useful for running tests (mocking)
+	 * @param MongoDB
+	 * @return void
+	 */
+	public function init($options)
+	{
+        // set defaults
+        $options = array_merge(array(
+            'host' => 'localhost',
+            'port' => 27017,
+            'connect' => true,
+        ), $options);
+
+        // build up the url
+        if (isset($options['socket'])) {
+            $uri = 'mongodb://' . $options['socket'];
+        } elseif (isset($options['host']) and isset($options['port'])) {
+            $uri = 'mongodb://' . $options['host'] . ':' . $options['port'];
         }
 
-        return static::$instance;
-    }
+        // prepare the options for this instance
+        $this->options = array_intersect_key($options, array_flip( array(
+            'db',
+            'classmap',
+        ) ));
 
-    /**
-     * Allows the instance to be swapped during tests
-	 * @param Connection $instance New instance
-     */
-    public static function setInstance(Connection $instance)
-    {
-        static::$instance = $instance;
-    }
+        // prepare the options for
+        $mongoOptions = array_intersect_key($options, array_flip( array(
+            'connect',
+            'username',
+            'password',
+            'db',
+        ) ));
 
-    /**
-     * Protected constructor to prevent creating a new instance of the
-     * *Singleton* via the `new` operator from outside of this class.
-     */
-    protected function __construct()
-    {
-
-    }
+        // $this->client = new \MongoClient($uri, $mongoOptions);
+        $this->client = new \MongoClient($uri, $mongoOptions);
+	}
 
 	/**
 	 * Database can be set here, also useful for running tests (mocking)
@@ -81,45 +87,10 @@ class Connection
 	public function getDatabase()
 	{
 		if (!$this->db instanceof \MongoDB) {
-			$this->db = $this->client->selectDB( $this->options['dbname'] );
+			$this->db = $this->client->selectDB( $this->options['db'] );
 		}
 
 		return $this->db;
-	}
-
-	/**
-	 * Database can be set here, also useful for running tests (mocking)
-	 * @param MongoDB
-	 * @return void
-	 */
-	public function init($options)
-	{
-        // set defaults
-        $options = array_merge(array(
-            'host' => 'localhost',
-            'port' => 27017,
-            'connect' => true,
-        ), $options);
-
-        // build up the url
-        $uri = 'mongodb://';
-        $uri .= isset($options['socket']) ? $options['socket'] : $options['host'] . ':' . $options['port'];
-
-        // prepare the options for this instance
-        $this->options = array_intersect_key($options, array_flip( array(
-            'db',
-            'classmap',
-        ) ));
-
-        // prepare the options for
-        $mOptions = array_intersect_key($options, array_flip( array(
-            'connect',
-            'username',
-            'password',
-            'db',
-        ) ));
-
-        $this->client = new \MongoClient($uri, $mOptions);
 	}
 
 	/**
@@ -196,7 +167,7 @@ class Connection
 	{
         $collection = $this->getDatabase()->selectCollection($collectionName);
 
-        return $collection->delete($query, $options);
+        return $collection->remove($query, $options);
 	}
 
 	/**
@@ -220,23 +191,36 @@ class Connection
      * For creating a auto-increment sequence number
      * @param string $collectionName Collection to get next counter for
      * @return int
+     * @see https://docs.mongodb.org/manual/tutorial/create-an-auto-incrementing-field/
      */
     public function getNextSequence($collectionName) {
 
-        $collection = $this->getDatabase()->selectCollection('counters');
+        // fetch from the sequences collection
+        $sequences = $this->getDatabase()->selectCollection('sequences')->findOne();
 
-        $counter = $collection->findAndModify( array(
-            'query' => array(
-                '_id' => $collectionName
-            ),
-            'update' => array(
-                '$inc' => array(
-                    'seq' => 1
-                ),
-            ),
-            'new' => true,
-        ) );
+        // if not found, create new
+        if (is_null($sequences)) { // document not found, insert
 
-        return $counter['seq'];
+            $sequences = array(
+                $collectionName => 1,
+            );
+
+            $this->getDatabase()->selectCollection('sequences')->insert($sequences);
+
+        } elseif (! isset($sequences[$collectionName])) { // document found, but collection name missing
+
+            $query = array(
+                '_id' => $sequences['_id'],
+            );
+
+            $sequences = array(
+                $collectionName => 1,
+            );
+
+            $this->getDatabase()->selectCollection('sequences')->update($query, $sequences);
+
+        }
+
+        return $sequences[$collectionName];
     }
 }

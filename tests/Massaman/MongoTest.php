@@ -4,9 +4,9 @@ use Massaman\Mongo;
 use Massaman\Mongo\Connection;
 
 /**
- * User class to test abstract Mongo methods
+ * UserUnit class to unit test abstract Mongo methods
  */
-class User extends Mongo
+class UserUnit extends Mongo
 {
 	/**
 	 * @var string
@@ -79,14 +79,9 @@ class CollectionUndefinedUser extends Mongo
 class MongoTest extends PHPUnit_Framework_TestCase
 {
 	/**
-	 * @var Mongo
+	 * @var User
 	 */
 	protected $user;
-
-	/**
-	 * @var MongoDB_Mock
-	 */
-	protected $dbMock;
 
 	/**
 	 *
@@ -105,10 +100,13 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		 	->method('getNextSequence')
 			->willReturn(1);
 
+		// reset Connection as it's being used across multiple tests (unit, int)
+		Connection::getInstance()->resetInstance();
+
 		// swap the instance as it's a singleton
 		Connection::setInstance($this->connectionMock);
 
-		$this->user = new User();
+		$this->user = new UserUnit();
 	}
 
 	public function testInstantiation()
@@ -126,7 +124,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function testCustomGetter()
     {
-		$user = new User();
+		$user = new UserUnit();
 
 		$user->first_name = 'Martyn';
 
@@ -137,7 +135,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function testGetterSetter()
     {
-		$user = new User();
+		$user = new UserUnit();
 
 		$user->last_name = 'Bissett';
 
@@ -148,7 +146,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function testCustomMethod()
     {
-		$user = new User();
+		$user = new UserUnit();
 
 		$value = $user->doSomething();
 
@@ -183,9 +181,34 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		// assertions
 
-		$this->assertTrue($result[0] instanceof User);
+		$this->assertTrue($result[0] instanceof UserUnit);
 		$this->assertEquals(count($usersData), count($result));
 		$this->assertEquals($result[0]->name, $usersData[0]['name']);
+    }
+
+	public function testFindReturnsEmptyArrayWhenNotFound()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('find')
+			->with($collectionName, $query, $options)
+			->willReturn(null);
+
+		$result = $this->user->find($query, $options);
+
+		// assertions
+
+		$this->assertTrue(is_array($result) and empty($result));
     }
 
 	public function testFindOneReturnsModelInstance()
@@ -213,8 +236,33 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		// assertions
 
-		$this->assertTrue($result instanceof User);
+		$this->assertTrue($result instanceof UserUnit);
 		$this->assertEquals($result->name, $usersData['name']);
+    }
+
+	public function testFindOneReturnsNullWhenNotFound()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with($collectionName, $query, $options)
+			->willReturn(null);
+
+		$result = $this->user->findOne($query, $options);
+
+		// assertions
+
+		$this->assertTrue(is_null($result));
     }
 
 	public function testDBRefPropertySetAsMongoObject()
@@ -245,14 +293,14 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		$this->connectionMock
 			->method('getCollectionClassNameFromClassMap')
-			->willReturn( 'User' );
+			->willReturn( 'UserUnit' );
 
 		$result = $this->user->findOne();
 
 		// assertions
 
-		$this->assertTrue($result instanceof User);
-		$this->assertTrue($result->friend instanceof User);
+		$this->assertTrue($result instanceof UserUnit);
+		$this->assertTrue($result->friend instanceof UserUnit);
     }
 
 	public function testSaveInsertsWhenSettingProperties()
@@ -273,7 +321,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('insert')
 			->with( $collectionName, $values );
 
-		$user = new User();
+		$user = new UserUnit();
 		$user->name = $usersData['name'];
 		$user->email = $usersData['email'];
 		$user->save();
@@ -302,7 +350,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('insert')
 			->with( $collectionName, $values );
 
-		$user = new User();
+		$user = new UserUnit();
 		$user->name = $usersData['name'];
 		$user->email = $usersData['email'];
 		$user->invalid = $usersData['invalid'];
@@ -329,7 +377,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('insert')
 			->with( $collectionName, $values );
 
-		$user = new User();
+		$user = new UserUnit();
 		$user->save($values);
 
 		// this second call shouldn't trigger another save, as $updated should
@@ -339,7 +387,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function testGetDBRefReturnsValidRef()
     {
-		$user = new User( $this->getUserData() );
+		$user = new UserUnit( $this->getUserData() );
 
 		$dbref = $user->getDBRef();
 
@@ -352,7 +400,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$collectionName = 'users';
 
 		// create friend object
-		$friend = new User( $this->getUserData( array(
+		$friend = new UserUnit( $this->getUserData( array(
 			'_id' => new MongoId('51b14c2de8e185801f000001'),
 			'name' => 'Neil',
 			'email' => 'neil@example.com',
@@ -367,7 +415,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 				'friend' => $friendRef,
 			) );
 
-		$user = new User();
+		$user = new UserUnit();
 		$user->friend = $friend; // append friend
 		$user->save();
 
@@ -396,7 +444,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('update')
 			->with( $collectionName, $query, $values, $options );
 
-		$user = new User($userData);
+		$user = new UserUnit($userData);
 		$user->save($values);
 
 		// this second call shouldn't trigger another save, as $updated should
@@ -424,7 +472,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('delete')
 			->with( $collectionName, $query, $options );
 
-		$user = new User($userData);
+		$user = new UserUnit($userData);
 		$user->delete($query, $options);
     }
 
@@ -448,7 +496,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->expects( $this->never() )
 			->method('delete');
 
-		$user = new User($userData);
+		$user = new UserUnit($userData);
 		$result = $user->delete($query, $options);
 
 		$this->assertFalse($result);
@@ -468,7 +516,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
     {
 		$id = new \MongoId('51b14c2de8e185801f000000');
 		$dbref = \MongoDBRef::create('users', '51b14c2de8e185801f000001');
-		$user = new User( array(
+		$user = new UserUnit( array(
 			'name' => 'Martyn',
 		) );
 
@@ -487,7 +535,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 				'name' => 'Neil',
 			) );
 
-		$user = new User($values);
+		$user = new UserUnit($values);
 		$toArray = $user->toArray(2);
 
 		// assertions
@@ -500,20 +548,20 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function testToArrayDeep()
     {
-		$louise = new User( $this->getUserData( array(
+		$louise = new UserUnit( $this->getUserData( array(
 			'_id' => new MongoId('51b14c2de8e185801f000001'),
 			'name' => 'Louise',
 			'email' => 'louise@example.com',
 		) ) );
 
-		$neil = new User( $this->getUserData( array(
+		$neil = new UserUnit( $this->getUserData( array(
 			'_id' => new MongoId('51b14c2de8e185801f000001'),
 			'name' => 'Neil',
 			'email' => 'neil@example.com',
 			'friend' => $louise,
 		) ) );
 
-		$martyn = new User( $this->getUserData( array(
+		$martyn = new UserUnit( $this->getUserData( array(
 			'friend' => $neil,
 		) ) );
 

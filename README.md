@@ -86,4 +86,4 @@ $user->toArray();
 
 ## Todo ##
 
-*
+* call Model::findOne(); without instance

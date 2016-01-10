@@ -36,6 +36,9 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		 	->method('selectCollection')
 			->willReturn( $this->collectionMock );
 
+		// reset Connection as it's being used across multiple tests (unit, int)
+		Connection::getInstance()->resetInstance();
+
 		// set options such as classmap
 		Connection::getInstance()->init( array(
 			'classmap' => array(
@@ -133,8 +136,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 
 		$this->collectionMock
 			->expects( $this->at(0) )
-			->method('findAndModify')
-			->willReturn( array('seq' => 1) );
+			->method('findOne')
+			->willReturn( array(
+				$collectionName => 1
+			) );
 
 		$this->connection->insert($collectionName, $values);
     }
@@ -175,6 +180,86 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 			->with($query, $values, $options);
 
 		$this->connection->update($collectionName, $query, $values, $options);
+    }
+
+	public function testGetNextSequenceInsertsWhenSequencesNotFound()
+    {
+		$collectionName = 'users';
+
+		$insertValues = array(
+			$collectionName => 1,
+		);
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with()
+			->willReturn(null);
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with($insertValues);
+
+		$nextSequence = $this->connection->getNextSequence($collectionName);
+
+		$this->assertEquals(1, $nextSequence);
+    }
+
+	public function testGetNextSequenceInsertsWhenSequencesFound()
+    {
+		$collectionName = 'users';
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with()
+			->willReturn(array(
+				$collectionName => 99,
+			));
+
+		$this->collectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$nextSequence = $this->connection->getNextSequence($collectionName);
+
+		$this->assertEquals(99, $nextSequence);
+    }
+
+	public function testGetNextSequenceInsertsWhenSequencesFoundButMissingCollectionName()
+    {
+		$collectionName = 'users';
+
+		$updateQuery = array(
+			'_id' => '1234567890',
+		);
+
+		$updateValues = array(
+			$collectionName => 1,
+		);
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with()
+			->willReturn(array(
+				'_id' => '1234567890', // index just needs to be present
+				'another' => 99,
+			));
+
+		$this->collectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('update')
+			->with($updateQuery, $updateValues);
+
+		$nextSequence = $this->connection->getNextSequence($collectionName);
+
+		$this->assertEquals(1, $nextSequence);
     }
 
 	protected function getUserValues($data=array())

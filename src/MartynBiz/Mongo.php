@@ -8,6 +8,7 @@ namespace MartynBiz;
 
 use MartynBiz\Mongo\Connection;
 use MartynBiz\Mongo\Utils;
+use MartynBiz\Mongo\MongoIterator;
 use MartynBiz\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
 use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
 
@@ -134,6 +135,9 @@ abstract class Mongo
 		foreach($result as $data) {
 			array_push($return, $this->createObjectFromDataArray($data));
 		}
+
+		// create iterator from $return
+		$return = new MongoIterator($return);
 
 		return $return;
 	}

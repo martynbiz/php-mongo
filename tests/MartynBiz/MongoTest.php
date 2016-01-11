@@ -1,7 +1,7 @@
 <?php
 
-use Massaman\Mongo;
-use Massaman\Mongo\Connection;
+use MartynBiz\Mongo;
+use MartynBiz\Mongo\Connection;
 
 /**
  * UserUnit class to unit test abstract Mongo methods
@@ -91,7 +91,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 	public function setup()
 	{
-		$this->connectionMock = $this->getMockBuilder('Massaman\\Mongo\\Connection')
+		$this->connectionMock = $this->getMockBuilder('MartynBiz\\Mongo\\Connection')
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -115,7 +115,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
     }
 
 	/**
-	 * @expectedException Massaman\Mongo\Exception\CollectionUndefined
+	 * @expectedException MartynBiz\Mongo\Exception\CollectionUndefined
 	 */
 	public function testInstantiationThrowsExceptionWhenCollectionUndefined()
     {
@@ -503,7 +503,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
     }
 
 	/**
-	 * @expectedException Massaman\Mongo\Exception\WhitelistEmpty
+	 * @expectedException MartynBiz\Mongo\Exception\WhitelistEmpty
 	 */
 	public function testSaveThrowsExceptionWhenWhitelistEmpty()
     {

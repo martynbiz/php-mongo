@@ -1,6 +1,6 @@
 <?php
 
-namespace Massaman\Mongo\Exception;
+namespace MartynBiz\Mongo\Exception;
 
 /**
  * White list is required on all models to protected against mass assingment attacks

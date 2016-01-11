@@ -1,6 +1,6 @@
 <?php
 
-use Massaman\Mongo\Utils;
+use MartynBiz\Mongo\Utils;
 
 class UtilsTest extends PHPUnit_Framework_TestCase
 {

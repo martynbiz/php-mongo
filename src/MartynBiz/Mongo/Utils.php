@@ -1,6 +1,6 @@
 <?php
 
-namespace Massaman\Mongo;
+namespace MartynBiz\Mongo;
 
 /**
  * This is the mongo db connection singleton instance class. It is only concerned

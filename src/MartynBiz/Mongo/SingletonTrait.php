@@ -1,6 +1,6 @@
 <?php
 
-namespace Massaman\Mongo;
+namespace MartynBiz\Mongo;
 
 /**
  * Can be re-used for anything that requires singleton pattern

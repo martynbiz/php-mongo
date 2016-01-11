@@ -1,6 +1,6 @@
 <?php
 
-use Massaman\Mongo\Connection;
+use MartynBiz\Mongo\Connection;
 
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {

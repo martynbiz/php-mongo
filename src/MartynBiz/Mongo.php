@@ -1,25 +1,25 @@
 <?php
 
-namespace Massaman;
+namespace MartynBiz;
 
 /**
  * Abstract class for creating mongo models
  **/
 
-use Massaman\Mongo\Connection;
-use Massaman\Mongo\Utils;
-use Massaman\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
-use Massaman\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
+use MartynBiz\Mongo\Connection;
+use MartynBiz\Mongo\Utils;
+use MartynBiz\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
+use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
 
 abstract class Mongo
 {
 	/**
-	 * @var string|MongoCollection
+	 * @var string
 	 */
 	protected $collection = '';
 
 	/**
-	 * @var string|MongoCollection
+	 * @var array
 	 */
 	protected $whitelist = array();
 
@@ -73,13 +73,13 @@ abstract class Mongo
 
 		// first check $updated, then $data
 		if (isset($this->updated[$name])) {
-			$value = &$this->updated[$name];
+			$value = $this->updated[$name];
 		} else {
-			$value = &$this->data[$name];
+			$value = $this->data[$name];
 		}
 
-		// if value of $name is a dbref, then convert it to it's object and then
-		// store the object as the new value of $name (so no need to load again)
+		// TODO what if ref'd item changes? we're not caching right? needs tested
+		// if value of $name is a dbref, then convert it to it's object
 		if (\MongoDBRef::isRef($value)) {
 
 			// get the dbref item

@@ -1,7 +1,7 @@
 <?php
 
-use Massaman\Mongo;
-use Massaman\Mongo\Connection;
+use MartynBiz\Mongo;
+use MartynBiz\Mongo\Connection;
 
 /**
  * User class to test abstract Mongo methods

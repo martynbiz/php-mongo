@@ -1,8 +1,8 @@
 <?php
 
-namespace Massaman\Mongo;
+namespace MartynBiz\Mongo;
 
-use Massaman\Mongo\SingletonTrait;
+use MartynBiz\Mongo\SingletonTrait;
 
 /**
  * This is the mongo db connection singleton instance class. It is only concerned

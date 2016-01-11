@@ -1,6 +1,6 @@
 <?php
 
-namespace Massaman\Mongo\Exception;
+namespace MartynBiz\Mongo\Exception;
 
 /**
  * Collection absolutely must be defined for the model

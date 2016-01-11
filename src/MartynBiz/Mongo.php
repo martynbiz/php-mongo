@@ -4,7 +4,7 @@ namespace MartynBiz;
 
 /**
  * Abstract class for creating mongo models
- **/
+ */
 
 use MartynBiz\Mongo\Connection;
 use MartynBiz\Mongo\Utils;
@@ -29,6 +29,12 @@ abstract class Mongo
 	 * @var array
 	 */
 	protected $data = array();
+
+	/**
+	 * The errors from validate (or by calls to setError)
+	 * @var array
+	 */
+	protected $errors = array();
 
 	/**
 	 * This is the updated data not yet saved. We store updated values in
@@ -56,7 +62,10 @@ abstract class Mongo
 		}
 
 		// store the data in the data property
-		$this->data = array_merge($this->data, $data);
+		$this->updated = array_merge($this->data, $data);
+
+		// ensure that data is also refelctive of $updated
+		$this->data = array_merge($this->data, $this->updated);
 	}
 
 	/**
@@ -66,12 +75,27 @@ abstract class Mongo
 	 */
 	public function __get($name)
 	{
-		// check if the developer has created a custom accessor here
-		$method = 'get' . Utils::snakeCaseToCamelCase($name);
-		if (method_exists($this, $method)) {
-			return $this->$method();
-		}
+		return $this->get($name);
+	}
 
+	/**
+	 * Get the object properties in $data
+	 * @param string $name
+	 * @param mixed $value
+	 * @return void
+	 */
+	public function __set($name, $value)
+	{
+		$this->set($name, $value);
+	}
+
+	/**
+	 * Get the object properties in $data
+	 * @param string $name
+	 * @return mixed
+	 */
+	public function get($name)
+	{
 		// first check $updated, then $data
 		if (isset($this->updated[$name])) {
 			$value = $this->updated[$name];
@@ -98,17 +122,12 @@ abstract class Mongo
 
 	/**
 	 * Get the object properties in $data
-	 * @param string $name
+	 * Useful in controllers to have a method that accepts an array
+	 * @param string|array $name Name of item, or name/value array
 	 * @param mixed $value
 	 */
-	public function __set($name, $value)
+	public function set($name, $value=null)
 	{
-		// check if the developer has created a custom accessor here
-		$method = 'set' . Utils::snakeCaseToCamelCase($name);
-		if (method_exists($this, $method)) {
-			return $this->$method($value);
-		}
-
 		// set the update property so it knows what fields have changed
 		$this->updated[$name] = $value;
 
@@ -160,6 +179,60 @@ abstract class Mongo
 	}
 
 	/**
+	 * This is encase we wanna catch method calls and do a little more (e.g. validate)
+	 * @return boolean
+	 * @see __call
+	 */
+	public function __call($name, $args=array())
+	{
+		switch ($name) {
+			case 'validate':
+				// validate is a user defined method so to save them having to
+				// remember to reset errors, and return a boolean, gonna do that
+				// here
+				$this->errors = array();
+				$this->validate();
+				return empty($this->errors);
+			default:
+				// catch all
+				call_user_func_array(array($this, $name), $args);
+		}
+	}
+
+	/**
+	 * This is the empty validate method, each model will defined their own
+	 * it is called during save
+	 * @return boolean
+	 * @see __call
+	 */
+	public function validate()
+	{
+		return true; // validates true if not overwritten
+	}
+
+	/**
+	 * Set push string error message or merge array error message
+	 * @param sting|array
+	 */
+	public function setError($error)
+	{
+		if (is_array($error)) {
+			array_merge($this->errors, $error);
+		} else {
+			array_push($this->errors, $error);
+		}
+	}
+
+	/**
+	 * Set push string error message or merge array error message
+	 * @param sting|array
+	 */
+	public function getErrors()
+	{
+		return $this->errors;
+	}
+
+	/**
 	 * Save an object's data to the database (insert or update)
 	 * @param array $data Data can also by save by passing into this method
 	 */
@@ -173,9 +246,18 @@ abstract class Mongo
 		// merge passed in values too
 		$this->updated = array_merge($this->updated, $data);
 
+		// call valdidate method - validate alone only sets errors, so we need to
+		// reset errors, then return true if no errors. This is handled externally
+		// by __call so we'll just use that method here to keep things short
+		if (! $this->__call('validate')) {
+			return false;
+		}
+
 		// filter $data against $whitelist
 		// it goes here as we only want to protect against saving to db, we still want to
 		// be able to load protected properties eg. is_admin
+		// This should come after validate() as we mayb want to validate additional
+		// params within this model prior to saving, even if they don't make it to the db
 		$this->filterValues($this->updated);
 
 		// if nothing to update, return false

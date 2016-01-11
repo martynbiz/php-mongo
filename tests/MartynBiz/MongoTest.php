@@ -25,29 +25,43 @@ class UserUnit extends Mongo
 	);
 
 	/**
-	 * Custom accessor for property
-	 */
-	public function getFirstName()
-	{
-		return strtoupper($this->data['first_name']);
-	}
-
-	/**
-	 * Custom accessor for property
-	 */
-	public function setLastName($value)
-	{
-		$value = strtolower($value);
-
-		$this->updated['last_name'] = $value;
-	}
-
-	/**
 	 * Custom method available to each instance
 	 */
 	public function doSomething()
 	{
 		return 'something';
+	}
+}
+
+/**
+ * UserUnit class to unit test abstract Mongo methods
+ */
+class UserValidator extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected $collection = 'users';
+
+	/**
+	 * @var string
+	 */
+	protected $whitelist = array(
+		'name',
+		'first_name',
+		'last_name',
+		'email',
+		'friend',
+	);
+
+	/**
+	 * Custom method available to each instance
+	 */
+	public function validate()
+	{
+		if (empty($this->data['name'])) {
+            $this->setError('name_missing_error');
+        }
 	}
 }
 
@@ -120,28 +134,6 @@ class MongoTest extends PHPUnit_Framework_TestCase
 	public function testInstantiationThrowsExceptionWhenCollectionUndefined()
     {
 		$user = new CollectionUndefinedUser();
-    }
-
-	public function testCustomGetter()
-    {
-		$user = new UserUnit();
-
-		$user->first_name = 'Martyn';
-
-		// assertions
-
-		$this->assertEquals('MARTYN', $user->first_name);
-    }
-
-	public function testGetterSetter()
-    {
-		$user = new UserUnit();
-
-		$user->last_name = 'Bissett';
-
-		// assertions
-
-		$this->assertEquals('bissett', $user->last_name);
     }
 
 	public function testCustomMethod()
@@ -301,6 +293,39 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		$this->assertTrue($result instanceof UserUnit);
 		$this->assertTrue($result->friend instanceof UserUnit);
+    }
+
+	public function testSaveReturnsFalseWhenValidationFails()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = array(
+			// 'name' => 'Martyn',
+		);
+
+		$this->connectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$user = new UserValidator($userData);
+		$user->save();
+    }
+
+	public function testSaveInsertsWhenValidationFails()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = array(
+			'name' => 'Martyn',
+		);
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with( $collectionName, $userData );
+
+		$user = new UserValidator($userData);
+		$user->save();
     }
 
 	public function testSaveInsertsWhenSettingProperties()

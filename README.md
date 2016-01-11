@@ -72,6 +72,28 @@ $user->save(array(
 ));
 ```
 
+### Validation ###
+
+Before saving to the database, the validate method is called. If it returns false,
+the data will not be saved.
+
+```php
+class User extends mongo
+{
+    .
+    .
+    .
+    public function validate()
+    {
+        if (empty($this->data['name'])) {
+            $this->setError('Name is missing.');
+        }
+
+        return empty( $this->getErrors() ); // true if none
+    }
+}
+```
+
 Deleting
 
 ```php

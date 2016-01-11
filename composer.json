@@ -1,7 +1,7 @@
 {
-    "name": "massaman/php-mongo",
+    "name": "martynbiz/php-mongo",
     "type": "library",
-    "homepage": "http://github.com/massaman/php-mongo",
+    "homepage": "http://github.com/martynbiz/php-mongo",
     "license": "MIT",
     "autoload": {
         "psr-0": {

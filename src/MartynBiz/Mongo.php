@@ -179,35 +179,20 @@ abstract class Mongo
 	}
 
 	/**
-	 * This is encase we wanna catch method calls and do a little more (e.g. validate)
-	 * @return boolean
-	 * @see __call
-	 */
-	public function __call($name, $args=array())
-	{
-		switch ($name) {
-			case 'validate':
-				// validate is a user defined method so to save them having to
-				// remember to reset errors, and return a boolean, gonna do that
-				// here
-				$this->errors = array();
-				$this->validate();
-				return empty($this->errors);
-			default:
-				// catch all
-				call_user_func_array(array($this, $name), $args);
-		}
-	}
-
-	/**
 	 * This is the empty validate method, each model will defined their own
 	 * it is called during save
 	 * @return boolean
-	 * @see __call
 	 */
 	public function validate()
 	{
-		return true; // validates true if not overwritten
+		// first, reset errors for this validation check
+		$this->resetErrors();
+		
+		// validation code here 
+		// e.g. if empty($this->data['name']) $this->setError('Name missing');
+		
+		// return true if errors is empty
+		return empty( $this->getErrors() );
 	}
 
 	/**
@@ -233,6 +218,15 @@ abstract class Mongo
 	}
 
 	/**
+	 * Set push string error message or merge array error message
+	 * @param sting|array
+	 */
+	public function resetErrors()
+	{
+		$this->errors = array();
+	}
+
+	/**
 	 * Save an object's data to the database (insert or update)
 	 * @param array $data Data can also by save by passing into this method
 	 */
@@ -246,10 +240,9 @@ abstract class Mongo
 		// merge passed in values too
 		$this->updated = array_merge($this->updated, $data);
 
-		// call valdidate method - validate alone only sets errors, so we need to
-		// reset errors, then return true if no errors. This is handled externally
-		// by __call so we'll just use that method here to keep things short
-		if (! $this->__call('validate')) {
+		// call valdidate method, this may be a user defined validate method
+		// by default though, this will return true and never really interfere
+		if (! $this->validate() ) {
 			return false;
 		}
 

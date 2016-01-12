@@ -1,5 +1,8 @@
 <?php
 
+// TODO test when app sets id and _id for insert
+// TODO test set can accept an array too
+
 use MartynBiz\Mongo;
 use MartynBiz\Mongo\Connection;
 
@@ -549,7 +552,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		);
 
 		$options = array(
-			'multi' => false,
+			'justOne' => true,
 		);
 
 		$this->connectionMock

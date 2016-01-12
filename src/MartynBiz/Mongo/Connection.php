@@ -128,12 +128,19 @@ class Connection
 	 */
 	public function insert($collectionName, &$values)
 	{
-        // set the id auto-increment property
-        $values['id'] = $this->getNextSequence($collectionName);
+        // our hash mongo id, this will be set to
+        if (! isset($values['_id']))
+            $values['_id'] = new \MongoId();
+
+        // this is an auto-increment id
+        if (! isset($values['id']))
+            $values['id'] = $this->getNextSequence($collectionName);
 
         $collection = $this->getDatabase()->selectCollection($collectionName);
 
-        return $collection->insert($values);
+        $result = $collection->insert($values);
+
+        return $result;
 	}
 
 	/**

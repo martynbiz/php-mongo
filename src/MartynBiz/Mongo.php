@@ -129,8 +129,12 @@ abstract class Mongo
 	 */
 	public function set($name, $value=null)
 	{
-		// set the update property so it knows what fields have changed
-		$this->updated[$name] = $value;
+		if (is_array($name)) {
+			$this->updated = array_merge($this->updated, $name);
+		} else {
+			// set the update property so it knows what fields have changed
+			$this->updated[$name] = $value;
+		}
 
 		// ensure that data is also refelctive of $updated
 		$this->data = array_merge($this->data, $this->updated);
@@ -303,12 +307,12 @@ abstract class Mongo
 
 		} else {
 
-			// insert
+			// insert - will return _id for us too
 			$result = Connection::getInstance()->insert($this->collection, $values);
 
-			// if _id set, set it to $data
-			if (isset($values['_id'])) {
-				$this->data['_id'] = $values['_id'];
+			// merge any newly set values (e.g. id, _id)
+			if (isset($values['id'])) {
+				$this->data['id'] = $values['id'];
 			}
 
 		}
@@ -324,13 +328,17 @@ abstract class Mongo
 	 * @return array $options
 	 * @return Mongo
 	 */
-	public function delete($query, $options=array())
+	public function delete()
 	{
 		if (! isset($this->data['_id'])) {
 			return false;
 		}
 
-		return Connection::getInstance()->delete($this->collection, $query, $options);
+		return Connection::getInstance()->delete($this->collection, array(
+			'_id' => $this->data['_id'],
+		), array(
+			'justOne' => true,
+		));
 	}
 
 	/**

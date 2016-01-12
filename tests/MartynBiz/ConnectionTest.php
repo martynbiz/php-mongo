@@ -121,13 +121,12 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('User', $class);
     }
 
-	public function testInsertCallsMongoDBInsert()
+	public function testInsertCallsMongoDBInsertWithMongoIdAsArgument()
     {
 		$collectionName = 'users';
 		$values = $this->getUserValues(array(
 			'id' => 1,
 		));
-		unset($values['_id']);
 
 		$this->collectionMock
 			->expects( $this->once() )

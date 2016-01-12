@@ -3,7 +3,7 @@
 Install with composer:
 
 ```
-"massaman/php-mongo": "*"
+"martynbiz/php-mongo": "*"
 ```
 
 After that, setup the connection.
@@ -26,7 +26,7 @@ Create models by extending the Mongo class, be sure to define $collection and $w
 ```php
 <?php
 
-use Massaman\Mongo;
+use MartynBiz\Mongo;
 
 class User extends mongo
 {

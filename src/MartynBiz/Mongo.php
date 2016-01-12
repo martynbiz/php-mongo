@@ -11,6 +11,7 @@ use MartynBiz\Mongo\Utils;
 use MartynBiz\Mongo\MongoIterator;
 use MartynBiz\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
 use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
+use MartynBiz\Mongo\Exception\NotFound as NotFoundException;
 
 abstract class Mongo
 {
@@ -179,24 +180,21 @@ abstract class Mongo
 	}
 
 	/**
-	 * This is encase we wanna catch method calls and do a little more (e.g. validate)
-	 * @return boolean
-	 * @see __call
+	 * Similar to findOne, but will throw an NotFoundException if not found
+	 * @param array $query
+	 * @param array $options
+	 * @return Mongo
 	 */
-	public function __call($name, $args=array())
+	public function findOneOrFail($query=array(), $options=array())
 	{
-		switch ($name) {
-			case 'validate':
-				// validate is a user defined method so to save them having to
-				// remember to reset errors, and return a boolean, gonna do that
-				// here
-				$this->errors = array();
-				$this->validate();
-				return empty($this->errors);
-			default:
-				// catch all
-				call_user_func_array(array($this, $name), $args);
+		$result = $this->findOne($query, $options);
+
+		// if result from findOne is null, return null
+		if (! $result) {
+			throw new NotFoundException;
 		}
+
+		return $result;
 	}
 
 	/**
@@ -233,6 +231,15 @@ abstract class Mongo
 	}
 
 	/**
+	 * Set push string error message or merge array error message
+	 * @param sting|array
+	 */
+	public function resetErrors()
+	{
+		$this->errors = array();
+	}
+
+	/**
 	 * Save an object's data to the database (insert or update)
 	 * @param array $data Data can also by save by passing into this method
 	 */
@@ -249,7 +256,7 @@ abstract class Mongo
 		// call valdidate method - validate alone only sets errors, so we need to
 		// reset errors, then return true if no errors. This is handled externally
 		// by __call so we'll just use that method here to keep things short
-		if (! $this->__call('validate')) {
+		if (! $this->validate()) {
 			return false;
 		}
 

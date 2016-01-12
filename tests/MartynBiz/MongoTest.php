@@ -59,9 +59,13 @@ class UserValidator extends Mongo
 	 */
 	public function validate()
 	{
+		$this->resetErrors();
+
 		if (empty($this->data['name'])) {
             $this->setError('name_missing_error');
         }
+
+		return empty( $this->getErrors() );
 	}
 }
 
@@ -225,6 +229,62 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->willReturn($usersData);
 
 		$result = $this->user->findOne($query, $options);
+
+		// assertions
+
+		$this->assertTrue($result instanceof UserUnit);
+		$this->assertEquals($result->name, $usersData['name']);
+    }
+
+	/**
+	 * @expectedException MartynBiz\Mongo\Exception\NotFound
+	 */
+	public function testFindOneOrFailThrowsExceptionWhenNotFound()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// the return value from the find
+		$usersData = $this->getUserData();
+
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with($collectionName, $query, $options)
+			->willReturn(null);
+
+		$result = $this->user->findOneOrFail($query, $options);
+    }
+
+	public function testFindOneOrFailReturnsModelInstance()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// the return value from the find
+		$usersData = $this->getUserData();
+
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with($collectionName, $query, $options)
+			->willReturn($usersData);
+
+		$result = $this->user->findOneOrFail($query, $options);
 
 		// assertions
 

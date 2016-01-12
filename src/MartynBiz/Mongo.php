@@ -201,11 +201,17 @@ abstract class Mongo
 	 * This is the empty validate method, each model will defined their own
 	 * it is called during save
 	 * @return boolean
-	 * @see __call
 	 */
 	public function validate()
 	{
-		return true; // validates true if not overwritten
+		// first, reset errors for this validation check
+		$this->resetErrors();
+
+		// validation code here
+		// e.g. if empty($this->data['name']) $this->setError('Name missing');
+
+		// return true if errors is empty
+		return empty( $this->getErrors() );
 	}
 
 	/**
@@ -253,10 +259,9 @@ abstract class Mongo
 		// merge passed in values too
 		$this->updated = array_merge($this->updated, $data);
 
-		// call valdidate method - validate alone only sets errors, so we need to
-		// reset errors, then return true if no errors. This is handled externally
-		// by __call so we'll just use that method here to keep things short
-		if (! $this->validate()) {
+		// call valdidate method, this may be a user defined validate method
+		// by default though, this will return true and never really interfere
+		if (! $this->validate() ) {
 			return false;
 		}
 

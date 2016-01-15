@@ -345,6 +345,15 @@ abstract class Mongo
 	 * Create a dbref of this object if required
 	 * @return MongoDBRef
 	 */
+	public function getConnection()
+	{
+		return Connection::getInstance();
+	}
+
+	/**
+	 * Create a dbref of this object if required
+	 * @return MongoDBRef
+	 */
 	public function getDBRef()
 	{
 		return \MongoDBRef::create($this->collection, $this->_id);

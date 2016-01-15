@@ -135,6 +135,11 @@ class MongoTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->user instanceof Mongo);
     }
 
+	public function testGetConnection()
+    {
+        $this->assertTrue($this->user->getConnection() instanceof Connection);
+    }
+
 	/**
 	 * @expectedException MartynBiz\Mongo\Exception\CollectionUndefined
 	 */
@@ -374,7 +379,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->save();
     }
 
-	public function testSaveInsertsWhenValidationFails()
+	public function testSaveInsertsWhenValidationSucceeds()
     {
 		// the return value from the find
 		$collectionName = 'users';

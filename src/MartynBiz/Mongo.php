@@ -1,4 +1,10 @@
 <?php
+// TODO create method
+// TODO mongo - how to handle created_at, updated_at
+// TODO mongo - soft deletes, deleted_at
+// TODO paginate
+// TODO access properties like: $user['username'] or $user->username
+// TODO $article = $this->get('model.article')->create(...); // we can mock this
 
 namespace MartynBiz;
 
@@ -250,6 +256,16 @@ abstract class Mongo
 	}
 
 	/**
+	 * Create on the fly, and return the new object
+	 * @param array $data Data can also by save by passing into this method
+	 * @return Mongo Newly created object
+	 */
+	public function create($data=array())
+	{
+		// TODO this
+	}
+
+	/**
 	 * Save an object's data to the database (insert or update)
 	 * @param array $data Data can also by save by passing into this method
 	 */
@@ -296,6 +312,11 @@ abstract class Mongo
 		// determine whether this is an insert or update
 		if (isset($this->data['_id'])) {
 
+			// append created_at date
+			$values = array_merge($values, array(
+				'updated_at' => new \MongoDate(time()),
+			));
+
 			$options = array(
 				'multi' => false, // only update one, don't spend looking for others
 			);
@@ -306,6 +327,11 @@ abstract class Mongo
 			), $values, $options);
 
 		} else {
+
+			// append created_at date
+			$values = array_merge($values, array(
+				'created_at' => new \MongoDate(time()),
+			));
 
 			// insert - will return _id for us too
 			$result = Connection::getInstance()->insert($this->collection, $values);
@@ -322,7 +348,10 @@ abstract class Mongo
 
 		}
 
-		// reset updated
+		// merge values into data - if insert, will add id and _id
+		$this->data = array_merge($this->data, $values);
+
+		// reset updated as data has been written
 		$this->updated = array();
 
 		return $result;

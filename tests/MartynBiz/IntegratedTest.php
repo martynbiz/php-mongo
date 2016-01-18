@@ -144,6 +144,10 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 		// assertions
 
 		$this->assertEquals($result->email, $louiseData['email']);
+
+		// created_at timestamp
+		$this->assertTrue($result->created_at instanceof \MongoDate);
+		$this->assertEquals(date('Y-m-d H:i:s', $result->created_at->sec), date('Y-m-d H:i:s'));
     }
 
 	public function testSaveInsertsWhenPassingArrayValues()
@@ -166,20 +170,25 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 		// assertions
 
 		$this->assertEquals($result->email, $louiseData['email']);
+
+		// created_at timestamp
+		$this->assertTrue($result->created_at instanceof \MongoDate);
+		$this->assertEquals(date('Y-m-d H:i:s', $result->created_at->sec), date('Y-m-d H:i:s'));
     }
 
-	public function testSaveUpdatesWithDBRefWhenPassingMongoObjectProperty()
+	public function testDBRefObjectificationWithDBRefWhenPassingMongoObjectProperty()
     {
-		// create friend object
-		$louise = new UserIntegrated( $this->getUserData( array(
-			'_id' => new MongoId('51b14c2de8e185801f000001'),
+		$userData = $this->getUserData( array(
 			'name' => 'Louise',
 			'email' => 'louise@example.com',
-		) ) );
+		) );
+
+		// create friend object
+		$louise = new UserIntegrated($userData);
+		$louise->save();
 
 		$user = new UserIntegrated();
 		$user->friend = $louise; // append friend
-		$user->save();
 
 		// assertions
 
@@ -202,6 +211,10 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 		// assertions
 
 		$this->assertEquals($user->email, $updatedValues['email']);
+
+		// updated_at timestamp
+		$this->assertTrue($user->updated_at instanceof \MongoDate);
+		$this->assertEquals(date('Y-m-d H:i:s', $user->updated_at->sec), date('Y-m-d H:i:s'));
     }
 
 	public function testDelete()

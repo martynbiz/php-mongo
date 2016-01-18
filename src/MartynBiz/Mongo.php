@@ -263,7 +263,8 @@ abstract class Mongo
 	 */
 	public function create($data=array())
 	{
-		$obj = new static($data);
+		$className = get_called_class();
+		$obj = new $className($data);
 		$obj->save();
 		return $obj;
 	}
@@ -296,6 +297,7 @@ abstract class Mongo
 		$this->filterValues($this->updated);
 
 		// if nothing to update, return false
+		// TODO remove this so we can e.g. insert an empty draft article
 		if (empty($this->updated)) {
 			return false;
 		}

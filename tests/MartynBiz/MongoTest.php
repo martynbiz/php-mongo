@@ -552,6 +552,28 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->save();
     }
 
+	public function testCreateReturnsObjectAfterInsert()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = $this->getUserData(array(
+			'created_at' => new \MongoDate(time()),
+		));
+		unset($userData['_id']);
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with( $collectionName, $userData );
+
+		$user = (new UserUnit())->create($userData);
+
+		$this->assertTrue($user instanceof UserUnit);
+
+		// created_at timestamp
+		$this->assertEquals(date('Y-m-d H:i:s', $user->created_at->sec), date('Y-m-d H:i:s'));
+    }
+
 	public function testDelete()
     {
 		// the return value from the find

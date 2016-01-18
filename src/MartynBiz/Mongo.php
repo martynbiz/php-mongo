@@ -256,13 +256,16 @@ abstract class Mongo
 	}
 
 	/**
-	 * Create on the fly, and return the new object
+	 * Create on the fly, and return the new object. Alternative way to insert
+	 * a new document.
 	 * @param array $data Data can also by save by passing into this method
 	 * @return Mongo Newly created object
 	 */
 	public function create($data=array())
 	{
-		// TODO this
+		$obj = new static($data);
+		$obj->save();
+		return $obj;
 	}
 
 	/**

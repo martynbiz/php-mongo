@@ -176,6 +176,21 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals(date('Y-m-d H:i:s', $result->created_at->sec), date('Y-m-d H:i:s'));
     }
 
+	public function testCreateReturnsObjectAfterInsert()
+    {
+		$userData = $this->getUserData();
+
+		$user = (new UserUnit())->create($userData);
+
+		// assertions
+
+		$this->assertEquals($user->email, $userData['email']);
+
+		// created_at timestamp
+		$this->assertTrue($user->created_at instanceof \MongoDate);
+		$this->assertEquals(date('Y-m-d H:i:s', $user->created_at->sec), date('Y-m-d H:i:s'));
+    }
+
 	public function testDBRefObjectificationWithDBRefWhenPassingMongoObjectProperty()
     {
 		$userData = $this->getUserData( array(

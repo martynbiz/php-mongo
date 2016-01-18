@@ -225,7 +225,7 @@ abstract class Mongo
 	public function setError($error)
 	{
 		if (is_array($error)) {
-			array_merge($this->errors, $error);
+			$this->errors = array_merge($this->errors, $error);
 		} else {
 			array_push($this->errors, $error);
 		}
@@ -313,6 +313,11 @@ abstract class Mongo
 			// merge any newly set values (e.g. id, _id)
 			if (isset($values['id'])) {
 				$this->data['id'] = $values['id'];
+			}
+
+			// merge any newly set values (e.g. id, _id)
+			if (isset($values['_id'])) {
+				$this->data['_id'] = $values['_id'];
 			}
 
 		}

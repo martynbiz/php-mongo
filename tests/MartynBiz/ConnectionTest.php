@@ -65,7 +65,9 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 			'email' => 'martyn@example.com',
 		);
 
-		$options = array();
+		$options = array(
+			'fields' => array('name', 'email'),
+		); // fields
 
 		// the return value from the find
 		$usersData = array(
@@ -75,7 +77,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->collectionMock
 			->expects( $this->once() )
 			->method('find')
-			->with($query, $options)
+			->with($query, $options['fields'])
 			->willReturn( $usersData );
 
 		$result = $this->connection->find($collection, $query, $options);

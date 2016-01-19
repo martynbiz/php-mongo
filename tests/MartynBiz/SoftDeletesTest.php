@@ -31,7 +31,7 @@ class SoftDeletesUser extends Mongo
 	);
 }
 
-class MongoTest extends PHPUnit_Framework_TestCase
+class SoftDeletesTest extends PHPUnit_Framework_TestCase
 {
 	/**
 	 * @var User

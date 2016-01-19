@@ -104,7 +104,24 @@ class Connection
 	{
         $collection = $this->getDatabase()->selectCollection($collection);
 
-        return $collection->find($query, $options);
+        // MongoCollection::find(): expects parameter 2 to be an array or object
+        $fields = isset($options['fields']) ? $options['fields'] : array();
+
+        $result = $collection->find($query, $fields);
+
+        // limit if set TODO test this?
+        if (isset($options['limit'])) {
+            $result = $result->limit((int) $options['limit']);
+        }
+
+        // skip if set
+        if (isset($options['skip'])) {
+            $result = $result->skip((int) $options['skip']);
+        }
+
+        // $total = $result->count();
+
+        return $result;
 	}
 
 	/**

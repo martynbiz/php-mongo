@@ -1,5 +1,6 @@
 <?php
 
+// TODO use getUser() -> new User with _id
 // TODO test when app sets id and _id for insert
 // TODO test set can accept an array too
 
@@ -595,7 +596,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->with( $collectionName, $query, $options );
 
 		$user = new UserUnit($userData);
-		$user->delete($query, $options);
+		$user->delete();
     }
 
 	public function testDeleteReturnsFalseWhenMongoIdMissing()
@@ -619,7 +620,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('delete');
 
 		$user = new UserUnit($userData);
-		$result = $user->delete($query, $options);
+		$result = $user->delete();
 
 		$this->assertFalse($result);
     }

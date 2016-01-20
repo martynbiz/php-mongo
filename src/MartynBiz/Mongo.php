@@ -43,13 +43,12 @@ abstract class Mongo
 	 */
 	protected $errors = array();
 
-	/**
-	 * This is the updated data not yet saved. We store updated values in
-	 * a seperate array so that we only need to update those values in the
-	 * collection when we save
-	 * @var array
-	 */
-	protected $updated = array();
+	// /**
+	//  * When new values are written, this will flag that the object is unsaved
+	//  * Also, prevents us hitting the database when there is nothing updated
+	//  * @var array
+	//  */
+	// protected $isDirty = false;
 
 	/**
 	 * Options e.g. database, user, password, etc
@@ -68,11 +67,14 @@ abstract class Mongo
 			throw new CollectionUndefinedException;
 		}
 
-		// store the data in the data property
-		$this->updated = array_merge($this->data, $data);
+		// filter $data against $whitelist
+		$this->filterValues($data);
 
-		// ensure that data is also refelctive of $updated
-		$this->data = array_merge($this->data, $this->updated);
+		// // store the data in the data property
+		// $this->updated = array_merge($this->data, $data);
+
+		// Merge $data with the protected $data
+		$this->data = array_merge($this->data, $data); //$this->updated);
 	}
 
 	/**
@@ -103,12 +105,8 @@ abstract class Mongo
 	 */
 	public function get($name)
 	{
-		// first check $updated, then $data
-		if (isset($this->updated[$name])) {
-			$value = $this->updated[$name];
-		} else {
-			$value = $this->data[$name];
-		}
+		// get the value from $data
+		$value = $this->data[$name];
 
 		// TODO what if ref'd item changes? we're not caching right? needs tested
 		// if value of $name is a dbref, then convert it to it's object
@@ -136,14 +134,11 @@ abstract class Mongo
 	public function set($name, $value=null)
 	{
 		if (is_array($name)) {
-			$this->updated = array_merge($this->updated, $name);
+			$this->data = array_merge($this->updated, $name);
 		} else {
 			// set the update property so it knows what fields have changed
-			$this->updated[$name] = $value;
+			$this->data[$name] = $value;
 		}
-
-		// ensure that data is also refelctive of $updated
-		$this->data = array_merge($this->data, $this->updated);
 	}
 
 	/**
@@ -280,8 +275,11 @@ abstract class Mongo
 			throw new WhitelistEmptyException;
 		}
 
+		// filter $data against $whitelist
+		$this->filterValues($data);
+
 		// merge passed in values too
-		$this->updated = array_merge($this->updated, $data);
+		$this->data = array_merge($this->data, $data);
 
 		// call valdidate method, this may be a user defined validate method
 		// by default though, this will return true and never really interfere
@@ -289,22 +287,8 @@ abstract class Mongo
 			return false;
 		}
 
-		// filter $data against $whitelist
-		// it goes here as we only want to protect against saving to db, we still want to
-		// be able to load protected properties eg. is_admin
-		// This should come after validate() as we mayb want to validate additional
-		// params within this model prior to saving, even if they don't make it to the db
-		$this->filterValues($this->updated);
-
-		// if nothing to update, return false
-		// TODO remove this so we can e.g. insert an empty draft article
-		if (empty($this->updated)) {
-			return false;
-		}
-
-		// set updated as we'll pass by referrence and it upsets out tests
-		// when $this->updated is reset
-		$values = $this->updated;
+		// These are the values we'll save with
+		$values = $this->data;
 
 		// loop through each $value and check if we need to convert
 		// objects to dbrefs
@@ -321,6 +305,7 @@ abstract class Mongo
 			$values = array_merge($values, array(
 				'updated_at' => new \MongoDate(time()),
 			));
+			unset($values['_id']); // don't need this
 
 			$options = array(
 				'multi' => false, // only update one, don't spend looking for others
@@ -341,23 +326,23 @@ abstract class Mongo
 			// insert - will return _id for us too
 			$result = Connection::getInstance()->insert($this->collection, $values);
 
-			// merge any newly set values (e.g. id, _id)
-			if (isset($values['id'])) {
-				$this->data['id'] = $values['id'];
-			}
-
-			// merge any newly set values (e.g. id, _id)
-			if (isset($values['_id'])) {
-				$this->data['_id'] = $values['_id'];
-			}
+			// // merge any newly set values (e.g. id, _id)
+			// if (isset($values['id'])) {
+			// 	$this->data['id'] = $values['id'];
+			// }
+			//
+			// // merge any newly set values (e.g. id, _id)
+			// if (isset($values['_id'])) {
+			// 	$this->data['_id'] = $values['_id'];
+			// }
 
 		}
 
 		// merge values into data - if insert, will add id and _id
 		$this->data = array_merge($this->data, $values);
 
-		// reset updated as data has been written
-		$this->updated = array();
+		// // reset updated as data has been written
+		// $this->updated = array();
 
 		return $result;
 	}
@@ -444,7 +429,16 @@ abstract class Mongo
 	 */
 	protected function createObjectFromDataArray($data=array())
 	{
-		return new static($data);
+		// we'll loop here because we don't want $data to be filtered (as this
+		// has come from the database)
+
+		$obj = new static();
+
+		foreach($data as $key => $value) {
+			$obj->$key = $value;
+		}
+
+		return $obj;
 	}
 
 	/**

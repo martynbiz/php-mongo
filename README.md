@@ -3,7 +3,7 @@
 Install with composer:
 
 ```
-"martynbiz/php-mongo": "*"
+"martynbiz/php-mongo": "dev-master"
 ```
 
 After that, setup the connection.

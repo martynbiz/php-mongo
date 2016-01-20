@@ -87,6 +87,7 @@ class SoftDeletesTest extends PHPUnit_Framework_TestCase
 			->with( $collectionName, $query, $values );
 
 		$user = new SoftDeletesUser($userData);
+		$user->_id = $userData['_id'];
 		$user->delete();
 
 		$this->assertEquals($values['deleted_at'], $user->deleted_at);

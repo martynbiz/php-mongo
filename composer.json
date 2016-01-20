@@ -1,5 +1,6 @@
 {
     "name": "martynbiz/php-mongo",
+    "description": "ODM for MongoDB with auto-incremented IDs, whitelists, soft deletes and save validation configurable.",
     "type": "library",
     "homepage": "http://github.com/martynbiz/php-mongo",
     "license": "MIT",
@@ -13,5 +14,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "4.3.*"
+    },
+    "suggest": {
+        "martynbiz/php-validator": "Optional simple to use extendable validator usable with validate() method."
     }
 }

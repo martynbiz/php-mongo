@@ -25,7 +25,7 @@ class UserUnit extends Mongo
 		'first_name',
 		'last_name',
 		'email',
-		'friend'
+		'friend',
 	);
 
 	/**
@@ -421,10 +421,6 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->name = $usersData['name'];
 		$user->email = $usersData['email'];
 		$user->save();
-
-		// this second call shouldn't trigger another save, as $updated should
-		// be empty
-		$user->save();
     }
 
 	public function testWhitelistEnabledWhenInvalidPropertySet()
@@ -434,28 +430,25 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$usersData = $this->getUserData( array(
 			'invalid' => 'not on whitelist',
 		) );
+		unset($usersData['_id']); // TODO this shouldn't be set from getUserData
 
 		// these are the values that will be passed to Connection::insert
-		$values = array(
-			'name' => $usersData['name'],
-			'email' => $usersData['email'],
-			'created_at' => new \MongoDate(time()),
-		);
+		// we'll remove the invalid one, and add additional ones such as created_at
+		$values = $usersData;
+		unset($values['invalid']);
+		$values['created_at'] = new \MongoDate(time());
 
 		$this->connectionMock
 			->expects( $this->once() )
 			->method('insert')
 			->with( $collectionName, $values );
 
-		$user = new UserUnit();
-		$user->name = $usersData['name'];
-		$user->email = $usersData['email'];
-		$user->invalid = $usersData['invalid'];
+		$user = new UserUnit($usersData);
 		$user->save();
 
-		// this second call shouldn't trigger another save, as $updated should
-		// be empty
-		$user->save();
+		// // this second call shouldn't trigger another save, as $updated should
+		// // be empty
+		// $user->save();
     }
 
 	public function testSaveInsertsWhenPassingArrayValues()
@@ -477,15 +470,13 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		$user = new UserUnit();
 		$user->save($values);
-
-		// this second call shouldn't trigger another save, as $updated should
-		// be empty
-		$user->save();
     }
 
 	public function testGetDBRefReturnsValidRef()
     {
-		$user = new UserUnit( $this->getUserData() );
+		$userData = $this->getUserData();
+		$user = new UserUnit($userData);
+		$user->_id = $userData['_id']; // not on whitelist
 
 		$dbref = $user->getDBRef();
 
@@ -527,12 +518,15 @@ class MongoTest extends PHPUnit_Framework_TestCase
     {
 		// the return value from the find
 		$collectionName = 'users';
+
 		$userData = $this->getUserData(array(
 			'updated_at' => new \MongoDate(time()),
 		));
+
 		$query = array(
 			'_id' => $userData['_id'],
 		);
+
 		$values = $userData;
 		unset($values['_id']);
 
@@ -546,11 +540,8 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->with( $collectionName, $query, $values, $options );
 
 		$user = new UserUnit($userData);
+		$user->_id = $userData['_id'];
 		$user->save($values);
-
-		// this second call shouldn't trigger another save, as $updated should
-		// be empty
-		$user->save();
     }
 
 	public function testCreateReturnsObjectAfterInsert()
@@ -596,6 +587,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->with( $collectionName, $query, $options );
 
 		$user = new UserUnit($userData);
+		$user->_id = $userData['_id'];
 		$user->delete();
     }
 
@@ -644,7 +636,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		) );
 
 		$values = array(
-			'friends' => array(
+			'friend' => array(
 				'Monty',
 				$id,
 				$dbref,
@@ -663,10 +655,10 @@ class MongoTest extends PHPUnit_Framework_TestCase
 
 		// assertions
 
-		$this->assertEquals('Monty', $toArray['friends'][0]);
-		$this->assertEquals('51b14c2de8e185801f000000', $toArray['friends'][1]);
-		$this->assertEquals('Neil', $toArray['friends'][2]['name']);
-		$this->assertEquals('Martyn', $toArray['friends'][3]['name']);
+		$this->assertEquals('Monty', $toArray['friend'][0]);
+		$this->assertEquals('51b14c2de8e185801f000000', $toArray['friend'][1]);
+		$this->assertEquals('Neil', $toArray['friend'][2]['name']);
+		$this->assertEquals('Martyn', $toArray['friend'][3]['name']);
     }
 
 	public function testToArrayDeep()

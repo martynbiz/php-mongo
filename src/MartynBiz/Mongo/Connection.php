@@ -217,34 +217,63 @@ class Connection
      * @return int
      * @see https://docs.mongodb.org/manual/tutorial/create-an-auto-incrementing-field/
      */
-    public function getNextSequence($collectionName) {
+    public function getNextSequence($name) {
 
-        // fetch from the sequences collection
-        $sequences = $this->getDatabase()->selectCollection('sequences')->findOne();
+        $collection = $this->getDatabase()->selectCollection('sequences');
 
-        // if not found, create new
-        if (is_null($sequences)) { // document not found, insert
+        $collection->update(
+            array(
+                $name => array('$exists' => true),
+            ),
+            array(
+                '$inc' => array($name => 1)
+            ),
+            array(
+                'upsert' => true,
+            )
+        );
 
-            $sequences = array(
-                $collectionName => 1,
-            );
+        $sequence = $collection->findOne(array(
+            $name => array(
+                '$exists' => true,
+            ),
+        ));
 
-            $this->getDatabase()->selectCollection('sequences')->insert($sequences);
+        // $sequence = $collection->findAndModify(
+        //     array('_id' => $name),
+        //     array('$inc' => array("seq" => 1)),
+        //     null,
+        //     array(
+        //         "new" => true,
+        //     )
+        // );
 
-        } elseif (! isset($sequences[$collectionName])) { // document found, but collection name missing
+//         // fetch from the sequences collection
+//         $sequences = $this->getDatabase()->selectCollection('sequences')->findOne();
+//
+//         // if not found, create new
+//         if (is_null($sequences)) { // document not found, insert
+//
+//             $sequences = array(
+//                 $collectionName => 1,
+//             );
+//
+//             $this->getDatabase()->selectCollection('sequences')->insert($sequences);
+//
+//         } elseif (! isset($sequences[$collectionName])) { // document found, but collection name missing
+// var_dump($sequences); exit;
+//             $query = array(
+//                 '_id' => $sequences['_id'],
+//             );
+//
+//             $sequences = array(
+//                 $collectionName => 1,
+//             );
+//
+//             $this->getDatabase()->selectCollection('sequences')->update($query, $sequences);
+//
+//         }
 
-            $query = array(
-                '_id' => $sequences['_id'],
-            );
-
-            $sequences = array(
-                $collectionName => 1,
-            );
-
-            $this->getDatabase()->selectCollection('sequences')->update($query, $sequences);
-
-        }
-
-        return $sequences[$collectionName];
+        return $sequence[$name];
     }
 }

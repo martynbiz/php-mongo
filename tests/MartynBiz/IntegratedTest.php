@@ -180,7 +180,7 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
     {
 		$userData = $this->getUserData();
 
-		$user = (new UserUnit())->create($userData);
+		$user = (new UserIntegrated())->create($userData);
 
 		// assertions
 
@@ -256,6 +256,23 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 		// assertions
 
 		$this->assertTrue(is_null($user));
+    }
+
+
+	// connection
+
+	public function testInsertCreateSequenceNumbers()
+    {
+		// reset Connection as it's being used across multiple tests (unit, int)
+		$connection = Connection::getInstance();
+
+		// don't really know where sequence will be up to, so we'll start from
+		// whatever it gives us here
+		$baseSequence = $connection->getNextSequence('users');
+
+		$this->assertEquals($baseSequence + 1, $connection->getNextSequence('users') );
+		$this->assertEquals($baseSequence + 2, $connection->getNextSequence('users') ); // upsert
+		$this->assertEquals($baseSequence + 3, $connection->getNextSequence('users') ); // upsert
     }
 
 	protected function getUserData($data=array())

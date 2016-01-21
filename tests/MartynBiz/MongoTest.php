@@ -544,6 +544,27 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->save($values);
     }
 
+	public function testFactoryReturnsObjectAfterInstatiating()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = $this->getUserData(array(
+			'created_at' => new \MongoDate(time()),
+		));
+		unset($userData['_id']);
+
+		$this->connectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$user = (new UserUnit())->factory($userData);
+
+		$this->assertTrue($user instanceof UserUnit);
+
+		// created_at timestamp
+		$this->assertFalse(isset($user->created_at));
+    }
+
 	public function testCreateReturnsObjectAfterInsert()
     {
 		// the return value from the find

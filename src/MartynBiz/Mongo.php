@@ -251,16 +251,29 @@ abstract class Mongo
 	}
 
 	/**
-	 * Create on the fly, and return the new object. Alternative way to insert
-	 * a new document.
+	 * Create on the fly, save, and return the new object. Alternative way to insert
+	 * a new document (testable too)
 	 * @param array $data Data can also by save by passing into this method
-	 * @return Mongo Newly created object
+	 * @return Mongo Newly inserted object
 	 */
 	public function create($data=array())
 	{
 		$className = get_called_class();
 		$obj = new $className($data);
 		$obj->save();
+		return $obj;
+	}
+
+	/**
+	 * Create on the fly, and return the new object (no insert). Alternative way to instantiate
+	 * an object (testable too)
+	 * @param array $data Data can also by save by passing into this method
+	 * @return Mongo Newly instatiated object
+	 */
+	public function factory($data=array())
+	{
+		$className = get_called_class();
+		$obj = new $className($data);
 		return $obj;
 	}
 

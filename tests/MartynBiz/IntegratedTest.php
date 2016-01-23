@@ -11,12 +11,12 @@ class UserIntegrated extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = 'users';
+	protected static $collection = 'users';
 
 	/**
 	 * @var string
 	 */
-	protected $whitelist = array(
+	protected static $whitelist = array(
 		'name',
 		'email',
 		'friend'

@@ -33,7 +33,7 @@ trait SoftDeletes
         );
 
         // update
-        $result = Connection::getInstance()->update($this->collection, $query, $values, $options);
+        $result = Connection::getInstance()->update(static::$collection, $query, $values, $options);
 
 		// merge values into data - if insert, will add id and _id
 		$this->data = array_merge($this->data, $values);
@@ -49,7 +49,7 @@ trait SoftDeletes
  	 * @param array $options
  	 * @return array
  	 */
- 	public function find($query=array(), $options=array())
+ 	public static function find($query=array(), $options=array())
  	{
         // attach deleted_at does not exist or deleted_at eq null
         $query = array_merge($query, array(
@@ -69,7 +69,7 @@ trait SoftDeletes
  	 * @param array $options
  	 * @return array
  	 */
- 	public function findOne($query=array(), $options=array())
+ 	public static function findOne($query=array(), $options=array())
  	{
         // attach deleted_at does not exist or deleted_at eq null
         $query = array_merge($query, array(

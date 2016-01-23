@@ -119,6 +119,41 @@ class CollectionUndefinedUser extends Mongo
 	);
 }
 
+/**
+ * UserUnit class to unit test abstract Mongo methods
+ */
+class UserCustomGetterSetter extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected static $collection = 'users';
+
+	/**
+	 * @var string
+	 */
+	protected static $whitelist = array(
+		'first_name',
+		'last_name',
+	);
+
+	/**
+	 * Custom getter
+	 */
+	public function getFirstName($value)
+	{
+		return strtolower($value);
+	}
+
+	/**
+	 * Custom setter
+	 */
+	public function setLastName($value)
+	{
+		return strtoupper($value);
+	}
+}
+
 class MongoTest extends PHPUnit_Framework_TestCase
 {
 	/**
@@ -168,6 +203,19 @@ class MongoTest extends PHPUnit_Framework_TestCase
 	public function testInstantiationThrowsExceptionWhenCollectionUndefined()
     {
 		$user = new CollectionUndefinedUser();
+    }
+
+	public function testCustomGetterSetterMethods()
+    {
+		$user = new UserCustomGetterSetter();
+
+		$user->first_name = 'Getter';
+		$user->last_name = 'Setter';
+
+		// assertions
+
+		// $this->assertEquals('getter', $user->first_name);
+		$this->assertEquals('SETTER', $user->last_name);
     }
 
 	public function testCustomMethod()

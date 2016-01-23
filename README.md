@@ -124,6 +124,28 @@ $user->save();
 Although having multiple methods may seem a little much, it does give the option to
 keep you code tidy and more flexible for mocking methods during testing.
 
+Deleting
+
+An instance can delete itself from the datavbase with the delete method:
+
+```php
+$user->delete();
+```
+
+To delete multiple documents from a collection by query, use the remove method:
+
+```php
+User::remove(array(
+    'type' => 'boring',
+), $options);
+```
+
+Convert to array
+
+```php
+$user->toArray(3); // convert nested 3 deep to array (optional)
+```
+
 
 ### Validation ###
 
@@ -188,25 +210,30 @@ class User extends mongo
 }
 ```
 
+### Custom Getter and Setters ###
 
-Deleting
-
-An instance can delete itself from the datavbase with the delete method:
-
-```php
-$user->delete();
-```
-
-To delete multiple documents from a collection by query, use the remove method:
+To automatically convert values when getting or setting, you can define custom methods
+to automatically convert the value of a property. This may be useful when storing passwords
+whereby the password is automatically hashed when set.
 
 ```php
-User::remove(array(
-    'type' => 'boring',
-), $options);
-```
+<?php
 
-Convert to array
+use MartynBiz\Mongo;
 
-```php
-$user->toArray(3); // convert nested 3 deep to array (optional)
+class User extends Mongo
+{
+    .
+    .
+    .
+    public function setPassword($value)
+    {
+        return md5($value); // pretty weak, but you get the idea :)
+    }
+
+    public function getCreatedAt($value)
+    {
+        return date('Y-M-d h:i:s', $this->data['created_at']->sec);
+    }
+}
 ```

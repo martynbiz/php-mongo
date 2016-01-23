@@ -132,6 +132,12 @@ abstract class Mongo
 			$this->data[$name] = $value;
 		}
 
+		// check if a custom getter has been defined for this class
+		$getterMethod = 'get' . Utils::snakeCaseToCamelCase($name);
+		if (method_exists($this, $getterMethod)) {
+			$value = $this->$getterMethod($value);
+		}
+
 		return $value;
 	}
 
@@ -146,6 +152,13 @@ abstract class Mongo
 		if (is_array($name)) {
 			$this->data = array_merge($this->updated, $name);
 		} else {
+
+			// check if a custom getter has been defined for this class
+			$setterMethod = 'set' . Utils::snakeCaseToCamelCase($name);
+			if (method_exists($this, $setterMethod)) {
+				$value = $this->$setterMethod($value);
+			}
+
 			// set the update property so it knows what fields have changed
 			$this->data[$name] = $value;
 		}
@@ -419,7 +432,7 @@ abstract class Mongo
 		}
 
 		// look for
-		foreach ($values as &$value) {
+		foreach ($values as $name => &$value) {
 			if ($value instanceof \MongoId) {
 				$value = $value->__toString();
 			} elseif ($value instanceof Mongo) {
@@ -438,6 +451,10 @@ abstract class Mongo
 				}
 			} elseif (is_array($value)) {
 				$value = $this->toArray($deep, $value);
+			} else {
+				// run $value through get() as there may be some custom getter methods
+				// as it may be a array or instances, we will skip if $name is not string
+				if (is_string($name)) $value = $this->get($name);
 			}
 		}
 

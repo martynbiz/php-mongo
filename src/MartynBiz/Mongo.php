@@ -316,11 +316,11 @@ abstract class Mongo
 		// loop through each $value and check if we need to convert
 		// objects to dbrefs
 		foreach($values as &$value) {
-			if ($value instanceof $this) {
+			if ($value instanceof Mongo) {
 				$value = $value->getDBRef();
 			}
 		}
-
+// var_dump($values); exit;
 		// determine whether this is an insert or update
 		if (isset($this->data['_id'])) {
 

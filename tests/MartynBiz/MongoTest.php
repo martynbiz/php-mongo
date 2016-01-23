@@ -15,12 +15,12 @@ class UserUnit extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = 'users';
+	protected static $collection = 'users';
 
 	/**
 	 * @var string
 	 */
-	protected $whitelist = array(
+	protected static $whitelist = array(
 		'name',
 		'first_name',
 		'last_name',
@@ -47,12 +47,12 @@ class ArticleUnit extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = 'articles';
+	protected static $collection = 'articles';
 
 	/**
 	 * @var string
 	 */
-	protected $whitelist = array(
+	protected static $whitelist = array(
 		'title',
 		'description',
 	);
@@ -66,12 +66,12 @@ class UserValidator extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = 'users';
+	protected static $collection = 'users';
 
 	/**
 	 * @var string
 	 */
-	protected $whitelist = array(
+	protected static $whitelist = array(
 		'name',
 		'first_name',
 		'last_name',
@@ -102,7 +102,7 @@ class WhitelistEmptyUser extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = 'users';
+	protected static $collection = 'users';
 }
 
 /**
@@ -113,7 +113,7 @@ class CollectionUndefinedUser extends Mongo
 	/**
 	 * @var string
 	 */
-	protected $whitelist = array(
+	protected static $whitelist = array(
 		'name',
 		'email'
 	);
@@ -212,6 +212,37 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($result[0]->name, $usersData[0]['name']);
     }
 
+	public function testStaticFindReturnsArrayOfInstances()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// the return value from the find
+		$usersData = array(
+			$this->getUserData(), // one result
+		);
+
+		// mock method to return mock collection
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('find')
+			->with($collectionName, $query, $options)
+			->willReturn($usersData);
+
+		$result = UserUnit::find($query, $options);
+
+		// assertions
+
+		$this->assertTrue($result[0] instanceof UserUnit);
+		$this->assertEquals(count($usersData), count($result));
+		$this->assertEquals($result[0]->name, $usersData[0]['name']);
+    }
+
 	public function testFindReturnsEmptyArrayWhenNotFound()
     {
 		$collectionName = 'users';
@@ -259,6 +290,35 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->willReturn($usersData);
 
 		$result = $this->user->findOne($query, $options);
+
+		// assertions
+
+		$this->assertTrue($result instanceof UserUnit);
+		$this->assertEquals($result->name, $usersData['name']);
+    }
+
+	public function testStaticFindOneReturnsModelInstance()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'email' => 'martyn@example.com',
+		);
+
+		$options = array();
+
+		// the return value from the find
+		$usersData = $this->getUserData();
+
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with($collectionName, $query, $options)
+			->willReturn($usersData);
+
+		$result = UserUnit::findOne($query, $options);
 
 		// assertions
 
@@ -586,6 +646,39 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertFalse(isset($user->created_at));
     }
 
+	public function testFactoryReturnsObjectWithParams()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = $this->getUserData();
+		unset($userData['_id']);
+
+		$this->connectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$userInstance = new UserUnit();
+		$user = $userInstance->factory($userData);
+
+		$this->assertTrue($user instanceof UserUnit);
+    }
+
+	public function testStaticFactoryReturnsObjectWithParams()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = $this->getUserData();
+		unset($userData['_id']);
+
+		$this->connectionMock
+			->expects( $this->never() )
+			->method('insert');
+
+		$user = UserUnit::factory($userData);
+
+		$this->assertTrue($user instanceof UserUnit);
+    }
+
 	public function testCreateReturnsObjectAfterInsert()
     {
 		// the return value from the find
@@ -600,7 +693,30 @@ class MongoTest extends PHPUnit_Framework_TestCase
 			->method('insert')
 			->with( $collectionName, $userData );
 
-		$user = (new UserUnit())->create($userData);
+		$userInstance = new UserUnit();
+		$user = $userInstance->create($userData);
+
+		$this->assertTrue($user instanceof UserUnit);
+
+		// created_at timestamp
+		$this->assertEquals(date('Y-m-d H:i:s', $user->created_at->sec), date('Y-m-d H:i:s'));
+    }
+
+	public function testStaticCreateReturnsObjectAfterInsert()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+		$userData = $this->getUserData(array(
+			'created_at' => new \MongoDate(time()),
+		));
+		unset($userData['_id']);
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with( $collectionName, $userData );
+
+		$user = UserUnit::create($userData);
 
 		$this->assertTrue($user instanceof UserUnit);
 

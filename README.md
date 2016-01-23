@@ -46,7 +46,13 @@ class User extends mongo
 Find by mongo query
 
 ```php
+// statically
 $users = User::find(array(
+    'status' => 1,
+));
+
+// dynamically
+$users = (new User())->find(array(
     'status' => 1,
 ));
 ```
@@ -54,6 +60,12 @@ $users = User::find(array(
 Find one by mongo query
 
 ```php
+// statically
+$user = User::findOne(array(
+    'email' => 'info@examle.com',
+));
+
+// dynamically
 $user = User::findOne(array(
     'email' => 'info@examle.com',
 ));
@@ -81,7 +93,13 @@ will insert into the collection. It will return an instance of the created docum
 Note: when passing name/values, values will be whitelisted
 
 ```php
+// statically
 $user = User::create(array(
+    'name' => 'Jim',
+));
+
+// dynamically
+$user = (new User())->create(array(
     'name' => 'Jim',
 ));
 ```
@@ -90,9 +108,16 @@ Factory method doesn't actually insert, but will generate an instance with value
 It can then be altered and inserted with it's save method:
 
 ```php
+// statically
 $user = User::factory(array(
     'name' => 'Jim',
 ));
+
+// dynamically
+$user = (new User())->factory(array(
+    'name' => 'Jim',
+));
+
 $user->save();
 ```
 
@@ -122,6 +147,48 @@ class User extends mongo
 }
 ```
 
+The following example uses [martynbiz/php-validator](https://github.com/martynbiz/php-validator) library here.
+
+```php
+<?php
+
+use MartynBiz\Validator;
+
+class User extends mongo
+{
+    .
+    .
+    .
+    public function validate()
+    {
+        $this->resetErrors();
+
+        $validator = new Validator($this->data);
+
+        $validator->check('name')
+            ->isNotEmpty('Name is missing');
+
+        $validator->check('email')
+            ->isNotEmpty('Email address is missing')
+            ->isEmail('Invalid email address');
+
+        $message = 'Password must contain upper and lower case characters, and have more than 8 characters';
+        $validator->check('password')
+            ->isNotEmpty($message)
+            ->hasLowerCase($message)
+            ->hasUpperCase($message)
+            ->hasNumber($message)
+            ->isMinimumLength($message, 8);
+
+        // update the model's errors with the validators
+        $this->setError( $validator->getErrors() );
+
+        return empty($this->getErrors());
+    }
+}
+```
+
+
 Deleting
 
 ```php
@@ -131,9 +198,5 @@ $user->delete();
 Convert to array
 
 ```php
-$user->toArray();
+$user->toArray(3); // convert nested 3 deep to array (optional)
 ```
-
-## Todo ##
-
-* call Model::findOne(); without instance

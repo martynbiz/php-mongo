@@ -24,12 +24,12 @@ abstract class Mongo
 	/**
 	 * @var string
 	 */
-	protected $collection = '';
+	protected static $collection = '';
 
 	/**
 	 * @var array
 	 */
-	protected $whitelist = array();
+	protected static $whitelist = array();
 
 	/**
 	 * This is the data of the document being represented
@@ -63,12 +63,12 @@ abstract class Mongo
 	public function __construct($data=array())
 	{
 		// check if a $collection has been set
-		if (empty($this->collection)) {
+		if (empty(static::$collection)) {
 			throw new CollectionUndefinedException;
 		}
 
 		// filter $data against $whitelist
-		$this->filterValues($data);
+		static::filterValues($data);
 
 		// // store the data in the data property
 		// $this->updated = array_merge($this->data, $data);
@@ -146,9 +146,9 @@ abstract class Mongo
 	 * @param array $options
 	 * @return array
 	 */
-	public function find($query=array(), $options=array())
+	public static function find($query=array(), $options=array())
 	{
-		$result = Connection::getInstance()->find($this->collection, $query, $options);
+		$result = Connection::getInstance()->find(static::$collection, $query, $options);
 
 		// if result from find is null, return empty array
 		if (! $result) {
@@ -158,7 +158,7 @@ abstract class Mongo
 		// built array of objects
 		$return = array();
 		foreach($result as $data) {
-			array_push($return, $this->createObjectFromDataArray($data));
+			array_push($return, static::createObjectFromDataArray($data));
 		}
 
 		// create iterator from $return
@@ -172,16 +172,16 @@ abstract class Mongo
 	 * @return array $options
 	 * @return Mongo
 	 */
-	public function findOne($query=array(), $options=array())
+	public static function findOne($query=array(), $options=array())
 	{
-		$result = Connection::getInstance()->findOne($this->collection, $query, $options);
+		$result = Connection::getInstance()->findOne(static::$collection, $query, $options);
 
 		// if result from findOne is null, return null
 		if (! $result) {
 			return null;
 		}
 
-		return $this->createObjectFromDataArray($result);
+		return static::createObjectFromDataArray($result);
 	}
 
 	/**
@@ -256,7 +256,7 @@ abstract class Mongo
 	 * @param array $data Data can also by save by passing into this method
 	 * @return Mongo Newly inserted object
 	 */
-	public function create($data=array())
+	public static function create($data=array())
 	{
 		$className = get_called_class();
 		$obj = new $className($data);
@@ -270,7 +270,7 @@ abstract class Mongo
 	 * @param array $data Data can also by save by passing into this method
 	 * @return Mongo Newly instatiated object
 	 */
-	public function factory($data=array())
+	public static function factory($data=array())
 	{
 		$className = get_called_class();
 		$obj = new $className($data);
@@ -284,7 +284,7 @@ abstract class Mongo
 	public function save($data=array())
 	{
 		// check if a $whitelist has been defined, if not throw Exception
-		if (empty($this->whitelist)) {
+		if (empty(static::$whitelist)) {
 			throw new WhitelistEmptyException;
 		}
 
@@ -325,7 +325,7 @@ abstract class Mongo
 			);
 
 			// update
-			$result = Connection::getInstance()->update($this->collection, array(
+			$result = Connection::getInstance()->update(static::$collection, array(
 				'_id' => $this->data['_id'],
 			), $values, $options);
 
@@ -337,7 +337,7 @@ abstract class Mongo
 			));
 
 			// insert - will return _id for us too
-			$result = Connection::getInstance()->insert($this->collection, $values);
+			$result = Connection::getInstance()->insert(static::$collection, $values);
 
 		}
 
@@ -361,7 +361,7 @@ abstract class Mongo
 			return false;
 		}
 
-		return Connection::getInstance()->delete($this->collection, array(
+		return Connection::getInstance()->delete(static::$collection, array(
 			'_id' => $this->data['_id'],
 		), array(
 			'justOne' => true,
@@ -383,7 +383,7 @@ abstract class Mongo
 	 */
 	public function getDBRef()
 	{
-		return \MongoDBRef::create($this->collection, $this->_id);
+		return \MongoDBRef::create(static::$collection, $this->_id);
 	}
 
 	/**
@@ -430,7 +430,7 @@ abstract class Mongo
 	 * @param array $data
 	 * @return Mongo
 	 */
-	protected function createObjectFromDataArray($data=array())
+	protected static function createObjectFromDataArray($data=array())
 	{
 		// we'll loop here because we don't want $data to be filtered (as this
 		// has come from the database)
@@ -450,9 +450,9 @@ abstract class Mongo
 	 * @param array $data
 	 * @return Mongo
 	 */
-	protected function filterValues(&$data)
+	protected static function filterValues(&$data)
 	{
-		$data = array_intersect_key($data, array_flip($this->whitelist));
+		$data = array_intersect_key($data, array_flip(static::$whitelist));
 	}
 }
 

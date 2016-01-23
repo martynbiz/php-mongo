@@ -26,6 +26,8 @@ class UserUnit extends Mongo
 		'last_name',
 		'email',
 		'friend',
+		'article',
+		'articles',
 	);
 
 	/**
@@ -35,6 +37,25 @@ class UserUnit extends Mongo
 	{
 		return 'something';
 	}
+}
+
+/**
+ * Added this to properly test toArray with various model types
+ */
+class ArticleUnit extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected $collection = 'articles';
+
+	/**
+	 * @var string
+	 */
+	protected $whitelist = array(
+		'title',
+		'description',
+	);
 }
 
 /**
@@ -655,6 +676,9 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user = new UserUnit( array(
 			'name' => 'Martyn',
 		) );
+		$article = new ArticleUnit( array(
+			'title' => 'My article',
+		) );
 
 		$values = array(
 			'friend' => array(
@@ -662,6 +686,10 @@ class MongoTest extends PHPUnit_Framework_TestCase
 				$id,
 				$dbref,
 				$user,
+			),
+			'article' => $article,
+			'articles' => array(
+				$article,
 			),
 		);
 
@@ -680,6 +708,8 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('51b14c2de8e185801f000000', $toArray['friend'][1]);
 		$this->assertEquals('Neil', $toArray['friend'][2]['name']);
 		$this->assertEquals('Martyn', $toArray['friend'][3]['name']);
+		$this->assertEquals('My article', $toArray['article']['title']);
+		$this->assertEquals('My article', $toArray['articles'][0]['title']);
     }
 
 	public function testToArrayDeep()

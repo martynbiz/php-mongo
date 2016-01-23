@@ -339,16 +339,6 @@ abstract class Mongo
 			// insert - will return _id for us too
 			$result = Connection::getInstance()->insert($this->collection, $values);
 
-			// // merge any newly set values (e.g. id, _id)
-			// if (isset($values['id'])) {
-			// 	$this->data['id'] = $values['id'];
-			// }
-			//
-			// // merge any newly set values (e.g. id, _id)
-			// if (isset($values['_id'])) {
-			// 	$this->data['_id'] = $values['_id'];
-			// }
-
 		}
 
 		// merge values into data - if insert, will add id and _id
@@ -412,7 +402,7 @@ abstract class Mongo
 		foreach ($values as &$value) {
 			if ($value instanceof \MongoId) {
 				$value = $value->__toString();
-			} elseif ($value instanceof $this) {
+			} elseif ($value instanceof Mongo) {
 				if ($deep > 0) {
 					$value = $value->toArray( $deep-1 );
 				} else {

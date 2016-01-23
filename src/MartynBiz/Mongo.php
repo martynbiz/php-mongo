@@ -144,24 +144,19 @@ abstract class Mongo
 	/**
 	 * Get the object properties in $data
 	 * Useful in controllers to have a method that accepts an array
-	 * @param string|array $name Name of item, or name/value array
+	 * @param string $name Name of item, or name/value array
 	 * @param mixed $value
 	 */
 	public function set($name, $value=null)
 	{
-		if (is_array($name)) {
-			$this->data = array_merge($this->updated, $name);
-		} else {
-
-			// check if a custom getter has been defined for this class
-			$setterMethod = 'set' . Utils::snakeCaseToCamelCase($name);
-			if (method_exists($this, $setterMethod)) {
-				$value = $this->$setterMethod($value);
-			}
-
-			// set the update property so it knows what fields have changed
-			$this->data[$name] = $value;
+		// check if a custom getter has been defined for this class
+		$setterMethod = 'set' . Utils::snakeCaseToCamelCase($name);
+		if (method_exists($this, $setterMethod)) {
+			$value = $this->$setterMethod($value);
 		}
+
+		// set the update property so it knows what fields have changed
+		$this->data[$name] = $value;
 	}
 
 	/**

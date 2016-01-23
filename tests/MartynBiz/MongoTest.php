@@ -144,14 +144,6 @@ class UserCustomGetterSetter extends Mongo
 	{
 		return strtolower($value);
 	}
-
-	/**
-	 * Custom setter
-	 */
-	public function setLastName($value)
-	{
-		return strtoupper($value);
-	}
 }
 
 class MongoTest extends PHPUnit_Framework_TestCase
@@ -210,12 +202,10 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user = new UserCustomGetterSetter();
 
 		$user->first_name = 'Getter';
-		$user->last_name = 'Setter';
 
 		// assertions
 
-		// $this->assertEquals('getter', $user->first_name);
-		$this->assertEquals('SETTER', $user->last_name);
+		$this->assertEquals('getter', $user->first_name);
     }
 
 	public function testCustomMethod()

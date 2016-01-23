@@ -210,11 +210,11 @@ class User extends mongo
 }
 ```
 
-### Custom Getter and Setters ###
+### Custom Getter ###
 
-To automatically convert values when getting or setting, you can define custom methods
-to automatically convert the value of a property. This may be useful when storing passwords
-whereby the password is automatically hashed when set.
+To automatically convert values when getting, you can define custom methods
+to automatically convert the value of a property. This may be useful when formatting
+strings such as dates to human readable.
 
 ```php
 <?php
@@ -226,10 +226,6 @@ class User extends Mongo
     .
     .
     .
-    public function setPassword($value)
-    {
-        return md5($value); // pretty weak, but you get the idea :)
-    }
 
     public function getCreatedAt($value)
     {

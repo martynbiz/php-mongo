@@ -120,13 +120,17 @@ abstract class Mongo
 			// we have the data for the ref, but connection has the classmap
 			$class = Connection::getInstance()->getCollectionClassNameFromClassMap($value['$ref']);
 			$className = get_called_class();
-			$value = new $className($data);
+			$value = new $className();
 
-			// // as some data might not be present in the whitelist, we need to directly
-			// // assign
-			// foreach ($data as $key => $value) {
-			//
-			// }
+			// as some data might not be present in the whitelist, we need to directly
+			// assign
+			foreach ($data as $k => $v) {
+				$value->$k = $v;
+			}
+
+			// cache the new object so we don't have to do this every time we fetch a
+			// property from this dbref
+			$this->data[$name] = $value;
 		}
 
 		return $value;

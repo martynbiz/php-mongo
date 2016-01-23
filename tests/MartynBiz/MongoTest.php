@@ -181,6 +181,48 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('something', $value);
     }
 
+	public function testGetDBRefPropertyReturnsObjectWithAllPropertiesFromDB()
+    {
+		$collectionName = 'users';
+
+		$query = array(
+			'_id' => new \MongoId('51b14c2de8e185801f000001'),
+		);
+
+		$options = array();
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('findOne')
+			->with($collectionName, $query, $options)
+			->willReturn(array(
+				'name' => 'Neil',
+				'email' => 'neil@example.com',
+				'_id' => new \MongoId('51b14c2de8e185801f000001'),
+				'notwhitelisted' => 'hello'
+			));
+
+		$this->connectionMock
+			->method('getCollectionClassNameFromClassMap')
+			->willReturn( 'UserUnit' );
+
+		$user = new UserUnit(array(
+			'friend' => MongoDBRef::create('users', '51b14c2de8e185801f000001'),
+		));
+
+		$this->assertEquals('Neil', $user->friend->name);
+
+		// now that we've accessed the friend property once, it should be cached
+		// and >friend should now be an object
+		$this->assertTrue($user->friend instanceof UserUnit);
+
+		$this->assertEquals('neil@example.com', $user->friend->email);
+
+		// test an item not on the whitelist
+		$this->assertEquals('hello', $user->friend->notwhitelisted);
+		$this->assertEquals(new \MongoId('51b14c2de8e185801f000001'), $user->friend->_id);
+    }
+
 	public function testFindReturnsArrayOfInstances()
     {
 		$collectionName = 'users';
@@ -565,35 +607,39 @@ class MongoTest extends PHPUnit_Framework_TestCase
     }
 
 	// TODO how to set _id for tests?
-	// public function testSaveUpdatesWithDBRefWhenPassingMongoObjectProperty()
-    // {
-	// 	// the return value from the find
-	// 	$collectionName = 'users';
-	//
-	// 	// create friend object
-	// 	$friend = new UserUnit( $this->getUserData( array(
-	// 		'_id' => new MongoId('51b14c2de8e185801f000001'),
-	// 		'name' => 'Neil',
-	// 		'email' => 'neil@example.com',
-	// 	) ) );
-	//
-	// 	$friendRef = \MongoDBRef::create('users', $friend->_id);
-	//
-	// 	$this->connectionMock
-	// 		->expects( $this->once() )
-	// 		->method('update')
-	// 		->with( $collectionName, array(
-	// 			'friend' => $friendRef,
-	// 		) );
-	//
-	// 	$user = new UserUnit();
-	// 	$user->friend = $friend; // append friend
-	// 	$user->save();
-	//
-	// 	// this second call shouldn't trigger another save, as $updated should
-	// 	// be empty
-	// 	$user->save();
-    // }
+	public function testSaveInsertWithDBRefWhenPassingMongoObjectProperty()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+
+		// create friend object
+		$friend = new UserUnit( $this->getUserData( array(
+			'name' => 'Neil',
+			'email' => 'neil@example.com',
+		) ) );
+		$friend->_id = new \MongoId('51b14c2de8e185801f000001');
+
+		$friendRef = \MongoDBRef::create('users', $friend->_id);
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with( $collectionName, array(
+				'name' => 'Martyn',
+				'email' => 'martyn@example.com',
+				'friend' => $friendRef,
+				'created_at' => new \MongoDate(time()),
+			) );
+
+		$user = new UserUnit(array(
+			'name' => 'Martyn',
+			'email' => 'martyn@example.com',
+			'friend' => $friend, // pass object
+		));
+		// $user->friend = $friend; // append friend
+
+		$user->save();
+    }
 
 	public function testSaveUpdatesWhenPassingArrayValues()
     {
@@ -863,7 +909,7 @@ class MongoTest extends PHPUnit_Framework_TestCase
 	protected function getUserData($data=array())
 	{
 		return array_merge(array(
-			'_id' => new MongoId('51b14c2de8e185801f000000'),
+			'_id' => new MongoId('51b14c2de8e185801f000000'), // not on whitelist
 			'name' => 'Martyn Bissett',
 			'first_name' => 'Martyn',
 			'last_name' => 'Bissett',

@@ -379,6 +379,14 @@ abstract class Mongo
 	}
 
 	/**
+	 * @param array $query
+	 */
+	public static function remove($query, $options)
+	{
+		return Connection::getInstance()->delete(static::$collection, $query, $options);
+	}
+
+	/**
 	 * Create a dbref of this object if required
 	 * @return MongoDBRef
 	 */

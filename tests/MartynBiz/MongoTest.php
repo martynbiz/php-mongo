@@ -795,6 +795,27 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->delete();
     }
 
+	public function testRemove()
+    {
+		// the return value from the find
+		$collectionName = 'users';
+
+		$userData = $this->getUserData();
+
+		$query = array(
+			'email' => $userData['email'],
+		);
+
+		$options = array();
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('delete')
+			->with( $collectionName, $query, $options );
+
+		UserUnit::remove($query, $options);
+    }
+
 	public function testDeleteReturnsFalseWhenMongoIdMissing()
     {
 		// the return value from the find

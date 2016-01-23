@@ -191,8 +191,18 @@ class User extends mongo
 
 Deleting
 
+An instance can delete itself from the datavbase with the delete method:
+
 ```php
 $user->delete();
+```
+
+To delete multiple documents from a collection by query, use the remove method:
+
+```php
+User::remove(array(
+    'type' => 'boring',
+), $options);
 ```
 
 Convert to array

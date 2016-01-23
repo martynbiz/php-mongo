@@ -118,8 +118,7 @@ abstract class Mongo
 			));
 
 			// we have the data for the ref, but connection has the classmap
-			$class = Connection::getInstance()->getCollectionClassNameFromClassMap($value['$ref']);
-			$className = get_called_class();
+			$className = Connection::getInstance()->getCollectionClassNameFromClassMap($value['$ref']);
 			$value = new $className();
 
 			// as some data might not be present in the whitelist, we need to directly

@@ -320,7 +320,7 @@ abstract class Mongo
 				$value = $value->getDBRef();
 			}
 		}
-// var_dump($values); exit;
+
 		// determine whether this is an insert or update
 		if (isset($this->data['_id'])) {
 
@@ -379,9 +379,11 @@ abstract class Mongo
 	}
 
 	/**
+	 * Remove documents from collection by query
 	 * @param array $query
+	 * @param array $options
 	 */
-	public static function remove($query, $options)
+	public static function remove($query=array(), $options=array())
 	{
 		return Connection::getInstance()->delete(static::$collection, $query, $options);
 	}

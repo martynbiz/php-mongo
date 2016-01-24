@@ -71,6 +71,57 @@ $user = User::findOne(array(
 ));
 ```
 
+Getting and setting values
+
+```
+// setting
+
+// on instantiation -- will be filtered against $whitelist
+$article = new Article(array(
+    'title' => 'My title',
+));
+
+$author = User::findOne(array(
+    //...
+));
+
+// single value properties -- no param filtering
+$article->status = 2;
+$article->author = $author;
+
+// AND/OR set() method, with Mongo instance -- suited for unit testing, no param filtering
+$user = User::findOne(array(
+    //...
+));
+$article->set('author', $author);
+
+// set value as query result (will be stored as an array of dbrefs)
+$tags = Tag::find(array(
+    //...
+));
+$article->tags = $tags;
+
+// lastly, params can be passed with save() -- will be filtered against $whitelist
+$article->save(array(
+    'content' => $text,
+))
+```
+
+```
+// getting
+
+$article = Article::findOne(array(
+    //...
+));
+
+// single value properties -- no param filtering
+echo $article->status;
+echo $article->author->name;
+echo $article->tags[0]->name;
+echo $article->get('author');
+```
+
+
 Inserting
 
 Save method is used on an instantiated object of the model class. It can be called

@@ -59,6 +59,25 @@ class ArticleUnit extends Mongo
 }
 
 /**
+ * See how Mongo handles a MongoIterator object being passed
+ */
+class TagUnit extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected static $collection = 'tags';
+
+	/**
+	 * @var string
+	 */
+	protected static $whitelist = array(
+		'name',
+		'slug',
+	);
+}
+
+/**
  * UserUnit class to unit test abstract Mongo methods
  */
 class UserValidator extends Mongo
@@ -584,6 +603,46 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$user->save();
     }
 
+	public function testSaveConvertsMongoIteratorObjectToArrayOfDBRefs()
+    {
+		// the return value from the find
+		$tagsData = array(
+			$this->getTagData(), // defaults
+			$this->getTagData(array( // defined
+				'name' => 'Art',
+				'slug' => 'art',
+			)),
+		);
+
+		// mock method to return mock collection
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('find')
+			->with('tags', array(), array())
+			->willReturn($tagsData);
+
+		$this->connectionMock
+			->expects( $this->once() )
+			->method('insert')
+			->with('articles', array(
+				'tags' => array(
+					\MongoDBRef::create('tags', $tagsData[0]['_id']),
+					\MongoDBRef::create('tags', $tagsData[1]['_id']),
+				),
+				'created_at' => new \MongoDate(time()),
+			))
+			->willReturn($tagsData);
+
+		// first, fetch the tags
+		$tags = TagUnit::find();
+
+		// next, set the article's tags property and save
+		// when saving, an array of dbrefs should be given
+		$article = new ArticleUnit();
+		$article->tags = $tags;
+		$article->save();
+    }
+
 	public function testWhitelistEnabledWhenInvalidPropertySet()
     {
 		// the return value from the find
@@ -965,14 +1024,37 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals('...', $toArray['friend']['friend']);
     }
 
-	protected function getUserData($data=array())
+	protected function getUserData($data=array(), $withId=true)
 	{
+		// set mongoid
+		if ($withId) $data = array_merge(array(
+				'_id' => $this->getUniqueMongoId(),
+			), $data);
+
 		return array_merge(array(
-			'_id' => new MongoId('51b14c2de8e185801f000000'), // not on whitelist
 			'name' => 'Martyn Bissett',
 			'first_name' => 'Martyn',
 			'last_name' => 'Bissett',
 			'email' => 'martyn@example.com',
 		), $data);
+	}
+
+	protected function getTagData($data=array(), $withId=true)
+	{
+		// set mongoid
+		if ($withId) $data = array_merge(array(
+				'_id' => $this->getUniqueMongoId(),
+			), $data);
+
+		return  array_merge(array(
+			'name' => 'Cooking',
+			'slug' => 'cooking',
+		), $data);
+	}
+
+	// TODO have tests using this instead of setting mongoid from get*Data methods
+	protected function getUniqueMongoId()
+	{
+		return new MongoId();
 	}
 }

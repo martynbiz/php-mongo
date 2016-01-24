@@ -326,6 +326,12 @@ abstract class Mongo
 		foreach($values as &$value) {
 			if ($value instanceof Mongo) {
 				$value = $value->getDBRef();
+			} elseif ($value instanceof MongoIterator) {
+				$newValue = []; // we'll build up an array
+				foreach($value as $model) {
+					array_push($newValue, $model->getDBRef());
+				}
+				$value = $newValue;
 			}
 		}
 

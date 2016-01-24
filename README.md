@@ -71,6 +71,18 @@ $user = User::findOne(array(
 ));
 ```
 
+Finding by object
+
+```php
+$friend = User::findOne(array(
+    //...
+));
+
+$user = User::find(array(
+    'friend' => friend,
+));
+```
+
 Getting and setting values
 
 ```
@@ -149,7 +161,7 @@ $user = User::create(array(
     'name' => 'Jim',
 ));
 
-// dynamically
+// dynamically (e.g. service locator pattern, or DI)
 $user = (new User())->create(array(
     'name' => 'Jim',
 ));
@@ -284,3 +296,7 @@ class User extends Mongo
     }
 }
 ```
+
+
+TODO
+* test that find/findOne are converting $query's Mongo and MongoIterator to DBRefs

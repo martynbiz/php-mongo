@@ -166,6 +166,22 @@ abstract class Mongo
 	 */
 	public static function find($query=array(), $options=array())
 	{
+		// loop through each $value and check if we need to convert
+		// objects to dbrefs
+		// TODO replace this with a function convertArrayItemsToDBRefs() and
+		//   use in find, findOne, and save
+		foreach($query as &$value) {
+			if ($value instanceof Mongo) {
+				$value = $value->getDBRef();
+			} elseif ($value instanceof MongoIterator) {
+				$newValue = []; // we'll build up an array
+				foreach($value as $model) {
+					array_push($newValue, $model->getDBRef());
+				}
+				$value = $newValue;
+			}
+		}
+
 		$result = Connection::getInstance()->find(static::$collection, $query, $options);
 
 		// if result from find is null, return empty array
@@ -192,6 +208,22 @@ abstract class Mongo
 	 */
 	public static function findOne($query=array(), $options=array())
 	{
+		// loop through each $value and check if we need to convert
+		// objects to dbrefs
+		// TODO replace this with a function convertArrayItemsToDBRefs() and
+		//   use in find, findOne, and save
+		foreach($query as &$value) {
+			if ($value instanceof Mongo) {
+				$value = $value->getDBRef();
+			} elseif ($value instanceof MongoIterator) {
+				$newValue = []; // we'll build up an array
+				foreach($value as $model) {
+					array_push($newValue, $model->getDBRef());
+				}
+				$value = $newValue;
+			}
+		}
+
 		$result = Connection::getInstance()->findOne(static::$collection, $query, $options);
 
 		// if result from findOne is null, return null
@@ -385,11 +417,15 @@ abstract class Mongo
 			return false;
 		}
 
-		return Connection::getInstance()->delete(static::$collection, array(
+		$query = array(
 			'_id' => $this->data['_id'],
-		), array(
+		);
+
+		$options = array(
 			'justOne' => true,
-		));
+		);
+
+		return Connection::getInstance()->delete(static::$collection, $query, $options);
 	}
 
 	/**

@@ -396,6 +396,46 @@ class MongoTest extends PHPUnit_Framework_TestCase
 		$this->assertEquals($result->name, $usersData['name']);
     }
 
+	public function testFindWithMongoInstanceQueriesWithDBRef()
+    {
+		// ===========================
+		// set up $friend and $user with _ids (required for dbref)
+
+		$friendData = $this->getUserData( array(
+			'name' => 'Neil McInnes',
+			'first_name' => 'Neil',
+			'last_name' => 'McInnes',
+			'email' => 'neil@example.com',
+		) );
+
+		$friend = new UserUnit($friendData);
+		$friend->_id = $friendData['_id'];
+
+		$userData = $this->getUserData( array(
+			'friend' => $friend->getDBRef(),
+		) );
+
+		$user = new UserUnit($userData);
+		$user->_id = $userData['_id'];
+
+
+
+		// =======================
+		// mock connection methods
+
+		$this->connectionMock
+			->expects( $this->once() ) // first call
+			->method('findOne')
+			->with('users', array(
+				'friend' => $friend->getDBRef(),
+			), array())
+			->willReturn($user);
+
+		$result = $this->user->findOne(array(
+			'friend' => $friend, // Mongo instance
+		));
+    }
+
 	public function testStaticFindOneReturnsModelInstance()
     {
 		$collectionName = 'users';

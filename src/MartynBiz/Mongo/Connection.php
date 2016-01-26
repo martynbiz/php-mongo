@@ -170,10 +170,10 @@ class Connection
 	 */
 	public function update($collectionName, $query, $values, $options=array())
 	{
-        // return false if nothing to update
-        if (empty($values)) {
-            return false;
-        }
+        // // return false if nothing to update
+        // if (empty($values)) {
+        //     return false;
+        // }
 
         $collection = $this->getDatabase()->selectCollection($collectionName);
 

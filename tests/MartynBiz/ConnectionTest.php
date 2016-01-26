@@ -164,24 +164,24 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->connection->update($collectionName, $query, $values, $options);
     }
 
-	public function testUpdateNeverCallsMongoDBUpdateWhenValuesEmpty()
-    {
-		$collectionName = 'users';
-		$query = array(
-			'$id' => '1234567890'
-		);
-		$values = array();
-		$options = array(
-			'multi' => true,
-		);
-
-		$this->collectionMock
-			->expects( $this->never() )
-			->method('update')
-			->with($query, $values, $options);
-
-		$this->connection->update($collectionName, $query, $values, $options);
-    }
+	// public function testUpdateNeverCallsMongoDBUpdateWhenValuesEmpty()
+    // {
+	// 	$collectionName = 'users';
+	// 	$query = array(
+	// 		'$id' => '1234567890'
+	// 	);
+	// 	$values = array();
+	// 	$options = array(
+	// 		'multi' => true,
+	// 	);
+	//
+	// 	$this->collectionMock
+	// 		->expects( $this->never() )
+	// 		->method('update')
+	// 		->with($query, $values, $options);
+	//
+	// 	$this->connection->update($collectionName, $query, $values, $options);
+    // }
 
 	protected function getUserValues($data=array())
 	{

@@ -407,6 +407,29 @@ abstract class Mongo
 	}
 
 	/**
+	 * Prepares the update for a $push, will convert Mongo and MongoIterators to
+	 * their DBRefs
+	 * @param array $data field/data pairs
+	 */
+	public function attach($data, $options)
+	{
+		// TODO check for _id
+
+		$update = array(
+			'$push' => array(),
+			'updated_at' => new \MongoDate(time()),
+		);
+
+		foreach ($data as $property => $value) {
+			$update['$push'][$property] = $value;
+		}
+
+		$result = Connection::getInstance()->update(static::$collection, array(
+			'_id' => $this->data['_id'],
+		), $update);
+	}
+
+	/**
 	 * @param array $query
 	 * @return array $options
 	 * @return Mongo

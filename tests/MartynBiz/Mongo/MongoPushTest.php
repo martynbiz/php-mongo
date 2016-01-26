@@ -16,7 +16,7 @@ class MongoPushTest extends MongoTestAbstract
 		$user->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -28,6 +28,14 @@ class MongoPushTest extends MongoTestAbstract
 						)
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -44,7 +52,7 @@ class MongoPushTest extends MongoTestAbstract
 		$user->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -56,6 +64,14 @@ class MongoPushTest extends MongoTestAbstract
 						)
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -77,7 +93,7 @@ class MongoPushTest extends MongoTestAbstract
 		$friend->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -89,6 +105,14 @@ class MongoPushTest extends MongoTestAbstract
 						),
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -111,7 +135,7 @@ class MongoPushTest extends MongoTestAbstract
 		$enemy->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -128,6 +152,14 @@ class MongoPushTest extends MongoTestAbstract
 						),
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -148,7 +180,7 @@ class MongoPushTest extends MongoTestAbstract
 		$friend->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -160,6 +192,14 @@ class MongoPushTest extends MongoTestAbstract
 						)
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -185,7 +225,7 @@ class MongoPushTest extends MongoTestAbstract
 		));
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -197,6 +237,14 @@ class MongoPushTest extends MongoTestAbstract
 						)
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 
@@ -213,7 +261,7 @@ class MongoPushTest extends MongoTestAbstract
 		$user->_id = new \MongoId();
 
 		$this->connectionMock
-			->expects( $this->once() )
+			->expects( $this->at(0) )
 			->method('update')
 			->with( 'users', array(
 				'_id' => $user->_id,
@@ -223,6 +271,14 @@ class MongoPushTest extends MongoTestAbstract
 						1, 2, 3,
 					),
 				),
+			), array() );
+
+		$this->connectionMock
+			->expects( $this->at(1) )
+			->method('update')
+			->with( 'users', array(
+				'_id' => $user->_id,
+			), array(
 				'updated_at' => new \MongoDate(time()),
 			), array() );
 

@@ -426,7 +426,6 @@ abstract class Mongo
 
 		$update = array(
 			'$push' => array(),
-			'updated_at' => new \MongoDate( time() ),
 		);
 
 		foreach ($data as $property => $value) {
@@ -470,6 +469,13 @@ abstract class Mongo
 		$result = Connection::getInstance()->update(static::$collection, array(
 			'_id' => $this->data['_id'],
 		), $update);
+
+		// now update updated_at coz we can't do that with the $push update
+		Connection::getInstance()->update(static::$collection, array(
+			'_id' => $this->data['_id'],
+		), array(
+			'updated_at' => new \MongoDate( time() ),
+		));
 	}
 
 	/**

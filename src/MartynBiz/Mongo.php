@@ -412,7 +412,7 @@ abstract class Mongo
 	 * their DBRefs
 	 * @param array $data field/data pairs
 	 */
-	public function attach($data, $options=array())
+	public function push($data, $options=array())
 	{
 		// default options (e.g. each=true)
 		$options = array_merge(array(
@@ -455,7 +455,7 @@ abstract class Mongo
 				}
 			});
 
-			// if $each is set (default: true) then build the $each array 
+			// if $each is set (default: true) then build the $each array
 			if ($options['each']) {
 				$value = array(
 					'$each' => $value,

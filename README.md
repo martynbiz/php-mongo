@@ -211,12 +211,12 @@ passed and each element will be pushed:
 ```php
 
 // push one object, will convert to DBRef
-$user->attach(array(
+$user->push(array(
     'friends' => $friend,
 ));
 
 // push multi object, will convert to DBRef
-$user->attach(array(
+$user->push(array(
     'friends' => array(
         $friend,
         $friend2,
@@ -224,18 +224,18 @@ $user->attach(array(
 ));
 
 // push MongoIterator object (from find() call)
-$user->attach(array(
+$user->push(array(
     'friends' => $friends,
 ));
 
 // push multiple properties at once
-$user->attach(array(
+$user->push(array(
     'friends' => $friends,
     'enemies' => $enemies,
 ));
 
 // push without $each setting, will push the whole array as a single element
-$user->attach(array(
+$user->push(array(
     'friends' => array(
         $friend,
         $friend2,

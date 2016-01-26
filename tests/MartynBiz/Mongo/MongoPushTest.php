@@ -7,7 +7,7 @@ require_once 'MongoTestAbstract.php';
 use MartynBiz\Mongo\Exception\MissingId;
 use MartynBiz\Mongo\MongoIterator;
 
-class MongoAttachTest extends MongoTestAbstract
+class MongoPushTest extends MongoTestAbstract
 {
 	public function testPushWithSingleValueAndHasMongoIdConvertsToPushUpdate()
     {
@@ -32,7 +32,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 
-		$user->attach( array(
+		$user->push( array(
 			'photo_ids' => 1,
 		) );
     }
@@ -60,7 +60,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'photo_ids' => array(
 				1, 2, 3,
 			),
@@ -93,7 +93,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'friends' => $friend,
 		) );
     }
@@ -132,7 +132,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'friends' => $friend,
 			'enemies' => $friend,
 		) );
@@ -164,7 +164,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'friends' => array(
 				$friend,
 			),
@@ -201,7 +201,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'friends' => $friends,
 		) );
     }
@@ -227,7 +227,7 @@ class MongoAttachTest extends MongoTestAbstract
 			), array() );
 
 		// attach
-		$user->attach( array(
+		$user->push( array(
 			'photo_ids' => array(
 				1, 2, 3,
 			),
@@ -248,7 +248,7 @@ class MongoAttachTest extends MongoTestAbstract
 			->expects( $this->never() )
 			->method('update');
 
-		$user->attach( array(
+		$user->push( array(
 			'photo_ids' => 1,
 		), array( 'each' => false ) );
     }

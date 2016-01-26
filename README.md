@@ -203,10 +203,10 @@ User::remove(array(
 ), $options);
 ```
 
-Attach
+Push
 
-In Mongo terms, this is a push() with $each property. So by default, an array can be
-passed and each element will be pushed:
+Note: push with $each is the default behaviour, although this can be overridden with
+'each'=>false in the options array (see below)
 
 ```php
 

@@ -450,7 +450,7 @@ abstract class Mongo
 			// nested arrays and convert them
 			array_walk_recursive($value, function (&$item, $key) {
 				if ($item instanceof Mongo) {
-						$item = $item->getDBRef();
+						$item = $item->getDBRef(); // seems this needs to be an array??
 				}
 			});
 

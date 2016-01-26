@@ -1,6 +1,7 @@
 <?php
 
-// TODO test set can accept an array too
+// !!! TODO we also set the new pushed property after writing
+// Do some integrated tests for this
 
 require_once 'MongoTestAbstract.php';
 
@@ -101,7 +102,7 @@ class MongoPushTest extends MongoTestAbstract
 				'$push' => array(
 					'friends' => array(
 						'$each' => array(
-							$friend->getDBRef()
+							$friend->getDBRef(),
 						),
 					),
 				),
@@ -143,12 +144,12 @@ class MongoPushTest extends MongoTestAbstract
 				'$push' => array(
 					'friends' => array(
 						'$each' => array(
-							$friend->getDBRef()
+							$friend->getDBRef(),
 						),
 					),
 					'enemies' => array(
 						'$each' => array(
-							$friend->getDBRef()
+							$friend->getDBRef(),
 						),
 					),
 				),

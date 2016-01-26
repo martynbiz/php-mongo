@@ -18,6 +18,7 @@ use MartynBiz\Mongo\MongoIterator;
 use MartynBiz\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
 use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
 use MartynBiz\Mongo\Exception\NotFound as NotFoundException;
+use MartynBiz\Mongo\Exception\MissingId as MissingIdException;
 
 abstract class Mongo
 {
@@ -411,16 +412,58 @@ abstract class Mongo
 	 * their DBRefs
 	 * @param array $data field/data pairs
 	 */
-	public function attach($data, $options)
+	public function attach($data, $options=array())
 	{
-		// TODO check for _id
+		// default options (e.g. each=true)
+		$options = array_merge(array(
+			'each' => true,
+		), $options);
+
+		// check for _id
+		if (! isset($this->data['_id'])) {
+			throw new MissingIdException;
+		}
 
 		$update = array(
 			'$push' => array(),
-			'updated_at' => new \MongoDate(time()),
+			'updated_at' => new \MongoDate( time() ),
 		);
 
 		foreach ($data as $property => $value) {
+
+			// if MongoIterator then build up an array of Mongo instances
+			// eg. [ User, User, User ]
+			if ($value instanceof MongoIterator) {
+				$arr = array();
+				foreach ($value as $i => $obj) {
+					array_push($arr, $obj);
+				}
+				$value = $arr;
+			}
+
+			// if $value is not an array, convert it to one here as it makes
+			// later simpler if we only have to expect one type (array)
+			if (! is_array($value)) {
+				$value = array($value);
+			}
+
+			// convert any Mongo elements to DBRefs. this will dig deep into
+			// nested arrays and convert them
+			array_walk_recursive($value, function (&$item, $key) {
+				if ($item instanceof Mongo) {
+						$item = $item->getDBRef();
+				}
+			});
+
+			// if $each is set (default: true) then build the $each array 
+			if ($options['each']) {
+				$value = array(
+					'$each' => $value,
+				);
+			} else {
+				$value = $value;
+			}
+
 			$update['$push'][$property] = $value;
 		}
 

@@ -203,6 +203,48 @@ User::remove(array(
 ), $options);
 ```
 
+Attach
+
+In Mongo terms, this is a push() with $each property. So by default, an array can be
+passed and each element will be pushed:
+
+```php
+
+// push one object, will convert to DBRef
+$user->attach(array(
+    'friends' => $friend,
+));
+
+// push multi object, will convert to DBRef
+$user->attach(array(
+    'friends' => array(
+        $friend,
+        $friend2,
+    ),
+));
+
+// push MongoIterator object (from find() call)
+$user->attach(array(
+    'friends' => $friends,
+));
+
+// push multiple properties at once
+$user->attach(array(
+    'friends' => $friends,
+    'enemies' => $enemies,
+));
+
+// push without $each setting, will push the whole array as a single element
+$user->attach(array(
+    'friends' => array(
+        $friend,
+        $friend2,
+    ),
+), array('each' => false));
+```
+
+
+
 Convert to array
 
 ```php

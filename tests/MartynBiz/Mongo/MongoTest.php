@@ -38,6 +38,17 @@ class MongoTest extends MongoTestAbstract
 		$this->assertEquals('getter', $user->first_name);
     }
 
+	public function testIsset()
+    {
+		$user = new UserUnit();
+
+		$user->first_name = 'Isset';
+
+		// assertions
+
+		$this->assertTrue( isset($user->first_name) );
+    }
+
 	public function testCustomMethod()
     {
 		$user = new UserUnit();

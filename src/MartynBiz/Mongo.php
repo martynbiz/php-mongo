@@ -1,10 +1,7 @@
 <?php
-// TODO create method
-// TODO mongo - how to handle created_at, updated_at
-// TODO mongo - soft deletes, deleted_at
 // TODO paginate
 // TODO access properties like: $user['username'] or $user->username
-// TODO $article = $this->get('model.article')->create(...); // we can mock this
+// TODO test: findOne, find, load with Mongo and MongoIterator in $query
 
 namespace MartynBiz;
 
@@ -97,6 +94,14 @@ abstract class Mongo
 	public function __set($name, $value)
 	{
 		$this->set($name, $value);
+	}
+
+	/**
+	 *
+	 */
+	public function __isset($name)
+	{
+		return isset($this->data[$name]);
 	}
 
 	/**
@@ -233,6 +238,40 @@ abstract class Mongo
 		}
 
 		return static::createObjectFromDataArray($result);
+	}
+
+	/**
+	 * Will load an objects values by query. Uses findOne with the query to load
+	 * values.
+	 * @param array $query
+	 * @return Mongo
+	 */
+	public function load($query=array(), $options=array())
+	{
+		// loop through each $value and check if we need to convert
+		// objects to dbrefs
+		// TODO replace this with a function convertArrayItemsToDBRefs() and
+		//   use in find, findOne, and save
+		foreach($query as &$value) {
+			if ($value instanceof Mongo) {
+				$value = $value->getDBRef();
+			} elseif ($value instanceof MongoIterator) {
+				$newValue = []; // we'll build up an array
+				foreach($value as $model) {
+					array_push($newValue, $model->getDBRef());
+				}
+				$value = $newValue;
+			}
+		}
+
+		$result = Connection::getInstance()->findOne(static::$collection, $query, $options);
+
+		// if result from findOne is null, return null
+		if (! $result) {
+			return null;
+		}
+
+		$this->data = $result;
 	}
 
 	/**
@@ -476,6 +515,11 @@ abstract class Mongo
 		), array(
 			'updated_at' => new \MongoDate( time() ),
 		));
+
+		// we can reload the document by calling it's own findOne
+		$this->load( array(
+			'_id' => $this->data['_id'],
+		) );
 	}
 
 	/**

@@ -2,6 +2,7 @@
 
 use MartynBiz\Mongo;
 use MartynBiz\Mongo\Connection;
+use MartynBiz\Mongo\MongoIterator;
 
 /**
  * User class to test abstract Mongo methods
@@ -134,22 +135,22 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 	// 	$this->assertTrue($result instanceof UserIntegrated);
 	// 	$this->assertEquals($result->email, $query['email']);
     // }
-
-	public function testDBRefPropertySetAsMongoObject()
-    {
-		$query = array(
-			'slug' => 'my-article',
-		);
-
-		$article = ArticleIntegrated::findOne($query);
-
-		// assertions
-
-		$this->assertTrue($article instanceof ArticleIntegrated);
-		$this->assertTrue($article->author instanceof UserIntegrated);
-		$this->assertEquals('Martyn', $article->author->name);
-    }
-
+	//
+	// public function testDBRefPropertySetAsMongoObject()
+    // {
+	// 	$query = array(
+	// 		'slug' => 'my-article',
+	// 	);
+	//
+	// 	$article = ArticleIntegrated::findOne($query);
+	//
+	// 	// assertions
+	//
+	// 	$this->assertTrue($article instanceof ArticleIntegrated);
+	// 	$this->assertTrue($article->author instanceof UserIntegrated);
+	// 	$this->assertEquals('Martyn', $article->author->name);
+    // }
+	//
 	// public function testSaveInsertsWhenSettingProperties()
     // {
 	// 	$louiseData = $this->getUserData( array(
@@ -302,6 +303,281 @@ class IntegratedTest extends PHPUnit_Framework_TestCase
 	// 	$this->assertEquals($baseSequence + 2, $connection->getNextSequence('users') ); // upsert
 	// 	$this->assertEquals($baseSequence + 3, $connection->getNextSequence('users') ); // upsert
     // }
+
+
+
+
+
+
+
+	// push
+
+	public function testPushWithSingleValueAndHasMongoIdConvertsToPushUpdate()
+    {
+		// the return value from the find
+		$user = UserUnit::findOne();
+
+		$user->push( array(
+			'photo_ids' => 1,
+		) );
+
+		$user->push( array(
+			'photo_ids' => 1,
+		) );
+
+		$this->assertTrue( isset($user->photo_ids) );
+		$this->assertEquals( 2, count($user->photo_ids) );
+    }
+
+	// public function testPushWithArrayValueAndHasMongoIdConvertsToPushUpdate()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'photo_ids' => array(
+	// 					'$each' => array(
+	// 						1, 2, 3,
+	// 					)
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'photo_ids' => array(
+	// 			1, 2, 3,
+	// 		),
+	// 	) );
+    // }
+	//
+	// public function testPushWithMongoValueConvertsToPushUpdateWithDBRef()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$friend = new UserUnit();
+	// 	$friend->_id = new \MongoId();
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'friends' => array(
+	// 					'$each' => array(
+	// 						$friend->getDBRef(),
+	// 					),
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'friends' => $friend,
+	// 	) );
+    // }
+	//
+	// public function testPushMultiplePropertiesWithMongoValueConvertsToPushUpdateWithDBRef()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$friend = new UserUnit();
+	// 	$friend->_id = new \MongoId();
+	//
+	// 	$enemy = new UserUnit();
+	// 	$enemy->_id = new \MongoId();
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'friends' => array(
+	// 					'$each' => array(
+	// 						$friend->getDBRef(),
+	// 					),
+	// 				),
+	// 				'enemies' => array(
+	// 					'$each' => array(
+	// 						$friend->getDBRef(),
+	// 					),
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'friends' => $friend,
+	// 		'enemies' => $friend,
+	// 	) );
+    // }
+	//
+	// public function testPushWithMongoArrayValueConvertsToPushUpdateWithDBRef()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$friend = new UserUnit();
+	// 	$friend->_id = new \MongoId();
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'friends' => array(
+	// 					'$each' => array(
+	// 						$friend->getDBRef(),
+	// 					)
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'friends' => array(
+	// 			$friend,
+	// 		),
+	// 	) );
+    // }
+	//
+	// public function testPushWithMongoIteratorValueConvertsToPushUpdateWithDBRef()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$friend = new UserUnit();
+	// 	$friend->_id = new \MongoId();
+	//
+	// 	$friends = new MongoIterator(array(
+	// 		$friend,
+	// 	));
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'friends' => array(
+	// 					'$each' => array(
+	// 						$friend->getDBRef(),
+	// 					)
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'friends' => $friends,
+	// 	) );
+    // }
+	//
+	// public function testPushWithArrayValueAndHasMongoIdConvertsToPushUpdateWhenEachIsFalse()
+    // {
+	// 	// the return value from the find
+	// 	$user = new UserUnit();
+	// 	$user->_id = new \MongoId();
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(0) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'$push' => array(
+	// 				'photo_ids' => array(
+	// 					1, 2, 3,
+	// 				),
+	// 			),
+	// 		), array() );
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->at(1) )
+	// 		->method('update')
+	// 		->with( 'users', array(
+	// 			'_id' => $user->_id,
+	// 		), array(
+	// 			'updated_at' => new \MongoDate(time()),
+	// 		), array() );
+	//
+	// 	// attach
+	// 	$user->push( array(
+	// 		'photo_ids' => array(
+	// 			1, 2, 3,
+	// 		),
+	// 	), array(
+	// 		'each' => false,
+	// 	));
+    // }
+
+
+
 
 	protected function getUserData($data=array())
 	{

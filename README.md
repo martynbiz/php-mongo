@@ -203,7 +203,7 @@ User::remove(array(
 ), $options);
 ```
 
-Push
+Push (currently not working - tested with mongo extension, not mongodb yet though)
 
 Note: push with $each is the default behaviour, although this can be overridden with
 'each'=>false in the options array (see below)

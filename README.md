@@ -9,7 +9,7 @@ Install with composer:
 After that, setup the connection.
 
 ```php
-Connection::getInstance()->setOptions(array(
+Connection::getInstance()->init(array(
     'db' => 'mydb',
     'username' => 'myuser',
     'password' => '89dD7HH7di!89',

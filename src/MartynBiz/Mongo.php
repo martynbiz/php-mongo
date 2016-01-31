@@ -112,9 +112,8 @@ abstract class Mongo
 	public function get($name)
 	{
 		// get the value from $data
-		$value = $this->data[$name];
+		$value = @$this->data[$name];
 
-		// TODO what if ref'd item changes? we're not caching right? needs tested
 		// if value of $name is a dbref, then convert it to it's object
 		if (\MongoDBRef::isRef($value)) {
 

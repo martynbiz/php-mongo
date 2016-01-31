@@ -1,9 +1,5 @@
 <?php
 
-// TODO test set can accept an array too
-
-require_once 'MongoTestAbstract.php';
-
 use MartynBiz\Mongo;
 use MartynBiz\Mongo\Connection;
 

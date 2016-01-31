@@ -162,3 +162,44 @@ class UserCustomGetterSetter extends Mongo
 		return strtolower($value);
 	}
 }
+
+/**
+ * User class to test abstract Mongo methods
+ */
+class UserIntegrated extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected static $collection = 'users';
+
+	/**
+	 * @var string
+	 */
+	protected static $whitelist = array(
+		'name',
+		'email',
+		'friends',
+		'compadres'
+	);
+}
+
+/**
+ * Best we don't use the same class for dbrefs conversions
+ */
+class ArticleIntegrated extends Mongo
+{
+	/**
+	 * @var string
+	 */
+	protected static $collection = 'articles';
+
+	/**
+	 * @var string
+	 */
+	protected static $whitelist = array(
+		'title',
+		'slug',
+		'author',
+	);
+}

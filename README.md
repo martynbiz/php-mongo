@@ -203,9 +203,9 @@ User::remove(array(
 ), $options);
 ```
 
-Push (currently not working - tested with mongo extension, not mongodb yet though)
+Push
 
-Note: push with $each is the default behaviour, although this can be overridden with
+Note: push with $each is the default behaviour here, although this can be overridden with
 'each'=>false in the options array (see below)
 
 ```php
@@ -342,3 +342,6 @@ class User extends Mongo
 
 TODO
 * test that find/findOne are converting $query's Mongo and MongoIterator to DBRefs
+
+tests
+* move test models into models/

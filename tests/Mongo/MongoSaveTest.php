@@ -1,9 +1,5 @@
 <?php
 
-// TODO test set can accept an array too
-
-require_once 'MongoTestAbstract.php';
-
 class MongoSaveTest extends MongoTestAbstract
 {
 	public function testSaveReturnsFalseWhenValidationFails()
@@ -107,12 +103,17 @@ class MongoSaveTest extends MongoTestAbstract
 
 	public function testWhitelistEnabledWhenInvalidPropertySet()
     {
+		// ================
+		// prepare data
+
 		// the return value from the find
-		$collectionName = 'users';
 		$usersData = $this->getUserData( array(
 			'invalid' => 'not on whitelist',
-		) );
-		unset($usersData['_id']); // TODO this shouldn't be set from getUserData
+		), false );
+
+
+		// ================
+		// mock
 
 		// these are the values that will be passed to Connection::insert
 		// we'll remove the invalid one, and add additional ones such as created_at
@@ -123,59 +124,66 @@ class MongoSaveTest extends MongoTestAbstract
 		$this->connectionMock
 			->expects( $this->once() )
 			->method('insert')
-			->with( $collectionName, $values );
+			->with( 'users', $values );
+
+
+		// ================
+		// run test
 
 		$user = new UserUnit($usersData);
 		$user->save();
-
-		// // this second call shouldn't trigger another save, as $updated should
-		// // be empty
-		// $user->save();
     }
 
 	public function testSaveInsertsWhenPassingArrayValues()
     {
-		// the return value from the find
-		$collectionName = 'users';
-		$userData = $this->getUserData();
+		// ================
+		// prepare data
 
-		$values = array(
-			'name' => $userData['name'],
-			'email' => $userData['email'],
-			'created_at' => new \MongoDate(time()),
-		);
+		// the return value from the find
+		$userData = $this->getUserData(array(), false);
+
+
+		// ================
+		// mock
 
 		$this->connectionMock
 			->expects( $this->once() )
 			->method('insert')
-			->with( $collectionName, $values );
+			->with( 'users', array_merge($userData, array(
+				'created_at' => new \MongoDate(time()),
+			)) );
+
+
+		// ================
+		// run test
 
 		$user = new UserUnit();
-		$user->save($values);
+		$user->save( $userData );
     }
 
-	// TODO how to set _id for tests?
 	public function testSaveInsertWithDBRefWhenPassingMongoObjectProperty()
     {
-		// the return value from the find
-		$collectionName = 'users';
+		// ================
+		// prepare data
 
 		// create friend object
-		$friend = new UserUnit( $this->getUserData( array(
+		$friend = new \UserUnit( $this->getUserData( array(
 			'name' => 'Neil',
 			'email' => 'neil@example.com',
 		) ) );
-		$friend->_id = new \MongoId('51b14c2de8e185801f000001');
+		$friend->_id = new \MongoId();
 
-		$friendRef = \MongoDBRef::create('users', $friend->_id);
+
+		// ================
+		// mock
 
 		$this->connectionMock
 			->expects( $this->once() )
 			->method('insert')
-			->with( $collectionName, array(
+			->with( 'users', array(
 				'name' => 'Martyn',
 				'email' => 'martyn@example.com',
-				'friend' => $friendRef,
+				'friend' => \MongoDBRef::create('users', $friend->_id),
 				'created_at' => new \MongoDate(time()),
 			) );
 
@@ -184,39 +192,50 @@ class MongoSaveTest extends MongoTestAbstract
 			'email' => 'martyn@example.com',
 			'friend' => $friend, // pass object
 		));
-		// $user->friend = $friend; // append friend
+
+
+		// ================
+		// run test
 
 		$user->save();
     }
 
 	public function testSaveUpdatesWhenPassingArrayValues()
     {
-		// the return value from the find
-		$collectionName = 'users';
+		// ================
+		// prepare User
 
-		$userData = $this->getUserData(array(
-			'updated_at' => new \MongoDate(time()),
-		));
+		// this is our User we'll be saving, note we set the _id as this
+		// is required to ensure it's an update() - not a insert() .. usually
+		// this would be set internally by load() during a find/findOne() call
+		$user = new UserUnit();
+		$user->_id = new \MongoId();
 
-		$query = array(
-			'_id' => $userData['_id'],
-		);
+		// this is the data we'll pass to save()
+		$saveData = $this->getUserData(array(), false); // no _id
 
-		$values = $userData;
-		unset($values['_id']);
 
-		$options = array(
-			'multi' => false,
-		);
+		// ================
+		// mock
 
 		$this->connectionMock
 			->expects( $this->once() )
 			->method('update')
-			->with( $collectionName, $query, $values, $options );
+			->with( 'users', array( // query
+				'_id' => $user->_id,
+			), array( // update values
+				'$set' => array_merge($saveData, array(
+					'updated_at' => new \MongoDate(time()),
+				)),
+			), array( // options
+				'multi' => false,
+			) );
 
-		$user = new UserUnit($userData);
-		$user->_id = $userData['_id'];
-		$user->save($values);
+
+		// ================
+		// run test
+
+		$user->save($saveData);
     }
 
 	/**

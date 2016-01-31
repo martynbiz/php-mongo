@@ -1,10 +1,5 @@
 <?php
 
-// !!! TODO we also set the new pushed property after writing
-// Do some integrated tests for this
-
-require_once 'MongoTestAbstract.php';
-
 use MartynBiz\Mongo\Exception\MissingId;
 use MartynBiz\Mongo\MongoIterator;
 
@@ -37,7 +32,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 
@@ -73,7 +70,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach
@@ -114,7 +113,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach
@@ -161,7 +162,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach
@@ -201,7 +204,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach
@@ -246,7 +251,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach
@@ -280,7 +287,9 @@ class MongoPushTest extends MongoTestAbstract
 			->with( 'users', array(
 				'_id' => $user->_id,
 			), array(
-				'updated_at' => new \MongoDate(time()),
+				'$set' => array(
+					'updated_at' => new \MongoDate(time()),
+				)
 			), array() );
 
 		// attach

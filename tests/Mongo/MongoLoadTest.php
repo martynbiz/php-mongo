@@ -1,9 +1,5 @@
 <?php
 
-// TODO test set can accept an array too
-
-require_once 'MongoTestAbstract.php';
-
 class MongoLoadTest extends MongoTestAbstract
 {
 	public function testStaticFindOneReturnsModelInstance()

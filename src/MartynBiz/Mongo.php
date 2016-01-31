@@ -410,14 +410,17 @@ abstract class Mongo
 		// determine whether this is an insert or update
 		if (isset($this->data['_id'])) {
 
-			// append created_at date
-			$values = array_merge($values, array(
-				'updated_at' => new \MongoDate(time()),
-			));
-			unset($values['_id']); // don't need this
+			// append updated_at date, also use $set so we don't overwrite
+			// values
+			$values = array(
+				'$set' => array_merge($values, array(
+					'updated_at' => new \MongoDate(time()),
+				)),
+			);
+			unset($values['$set']['_id']); // don't need this
 
 			$options = array(
-				'multi' => false, // only update one, don't spend looking for others
+				'multi' => false, // only update one, don't spend time looking for others
 			);
 
 			// update
@@ -513,7 +516,9 @@ abstract class Mongo
 		Connection::getInstance()->update(static::$collection, array(
 			'_id' => $this->data['_id'],
 		), array(
-			'updated_at' => new \MongoDate( time() ),
+			'$set' => array(
+				'updated_at' => new \MongoDate( time() )
+			),
 		));
 
 		// we can reload the document by calling it's own findOne
@@ -549,7 +554,7 @@ abstract class Mongo
 	 * @param array $query
 	 * @param array $options
 	 */
-	public static function remove($query=array(), $options=array())
+	public static function remove($query, $options=array())
 	{
 		return Connection::getInstance()->delete(static::$collection, $query, $options);
 	}

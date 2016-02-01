@@ -9,7 +9,22 @@ class IntegratedTest extends TestCase
 	/**
 	 * @var User
 	 */
-	protected $user;
+	protected $martyn;
+
+	/**
+	 * @var User
+	 */
+	protected $neil;
+
+	/**
+	 * @var User
+	 */
+	protected $louise;
+
+	/**
+	 * @var User
+	 */
+	protected $article;
 
 	/**
 	 *
@@ -37,28 +52,28 @@ class IntegratedTest extends TestCase
 		// create some fixtures
 
 		// neil
-		$neil = UserIntegrated::create(array(
+		$this->neil = UserIntegrated::create(array(
 			'name' => 'Neil',
 			'email' => 'neil@example.com',
 		));
 
 		// louise
-		$louiseData = UserIntegrated::create(array(
+		$this->louise = UserIntegrated::create(array(
 			'name' => 'Louise',
 			'email' => 'louise@example.com',
 		));
 
 		// martyn
-		$martyn = UserIntegrated::create(array(
+		$this->martyn = UserIntegrated::create(array(
 			'name' => 'Martyn',
 			'email' => 'martyn@example.com',
 		));
 
 		// article by martyn
-		$article = ArticleIntegrated::create(array(
+		$this->article = ArticleIntegrated::create(array(
 			'title' => 'My article',
 			'slug' => 'my-article',
-			'author' => $martyn,
+			'author' => $this->martyn,
 		));
 	}
 
@@ -68,6 +83,19 @@ class IntegratedTest extends TestCase
 		UserIntegrated::remove(array());
 		ArticleIntegrated::remove(array());
 	}
+
+	public function testGetWhenValueIsArrayOfDBRefsReturnsModelInstances()
+    {
+		$user = new UserIntegrated();
+		$user->set('friends', array(
+			$this->neil->getDBRef(),
+			$this->louise->getDBRef(),
+		));
+
+		// assertions
+		$this->assertEquals('Neil', $user->friends[0]->name);
+		$this->assertEquals('Louise', $user->friends[1]->name);
+    }
 
 	public function testFindReturnsArrayOfInstances()
     {
@@ -300,11 +328,11 @@ class IntegratedTest extends TestCase
 	public function testPushWithMongoValueConvertsToPushUpdateWithDBRef()
     {
 		// the return value from the find
-		$user = UserUnit::findOne(array(
+		$user = UserIntegrated::findOne(array(
 			'name' => 'Martyn',
 		));
 
-		$friend = UserUnit::findOne(array(
+		$friend = UserIntegrated::findOne(array(
 			'name' => 'Neil',
 		));
 
@@ -315,21 +343,21 @@ class IntegratedTest extends TestCase
 
 		$this->assertTrue( isset($user->friends) );
 		$this->assertEquals( 1, count($user->friends) );
-		$this->assertEquals( \MongoDBRef::create('users', $friend->_id), $user->friends[0] );
+		$this->assertEquals( $friend, $user->friends[0] );
     }
 
 	public function testPushMultiplePropertiesWithMongoValueConvertsToPushUpdateWithDBRef()
     {
 		// the return value from the find
-		$martyn = UserUnit::findOne(array(
+		$martyn = UserIntegrated::findOne(array(
 			'name' => 'Martyn',
 		));
 
-		$neil = UserUnit::findOne(array(
+		$neil = UserIntegrated::findOne(array(
 			'name' => 'Neil',
 		));
 
-		$louise = UserUnit::findOne(array(
+		$louise = UserIntegrated::findOne(array(
 			'name' => 'Louise',
 		));
 
@@ -346,18 +374,18 @@ class IntegratedTest extends TestCase
 		$this->assertTrue( isset($martyn->compadres) );
 		$this->assertEquals( 1, count($martyn->friends) );
 		$this->assertEquals( 2, count($martyn->compadres) );
-		$this->assertEquals( \MongoDBRef::create('users', $neil->_id), $martyn->friends[0] );
-		$this->assertEquals( \MongoDBRef::create('users', $neil->_id), $martyn->compadres[0] );
-		$this->assertEquals( \MongoDBRef::create('users', $louise->_id), $martyn->compadres[1] );
+		$this->assertEquals( $neil, $martyn->friends[0] );
+		$this->assertEquals( $neil, $martyn->compadres[0] );
+		$this->assertEquals( $louise, $martyn->compadres[1] );
     }
 
 	public function testPushWithMongoArrayValueConvertsToPushUpdateWithDBRef()
     {
-		$martyn = UserUnit::findOne(array(
+		$martyn = UserIntegrated::findOne(array(
 			'name' => 'Martyn',
 		));
 
-		$neil = UserUnit::findOne(array(
+		$neil = UserIntegrated::findOne(array(
 			'name' => 'Neil',
 		));
 
@@ -370,16 +398,16 @@ class IntegratedTest extends TestCase
 
 		$this->assertTrue( isset($martyn->friends) );
 		$this->assertEquals( 1, count($martyn->friends) );
-		$this->assertEquals( \MongoDBRef::create('users', $neil->_id), $martyn->friends[0] );
+		$this->assertEquals( $neil, $martyn->friends[0] );
     }
 
 	public function testPushWithMongoIteratorValueConvertsToPushUpdateWithDBRef()
     {
-		$martyn = UserUnit::findOne(array(
+		$martyn = UserIntegrated::findOne(array(
 			'name' => 'Martyn',
 		));
 
-		$friends = UserUnit::find(array(
+		$friends = UserIntegrated::find(array(
 			'name' => 'Neil',
 		));
 
@@ -390,13 +418,13 @@ class IntegratedTest extends TestCase
 
 		$this->assertTrue( isset($martyn->friends) );
 		$this->assertEquals( 1, count($martyn->friends) );
-		$this->assertEquals( \MongoDBRef::create('users', $friends[0]->_id), $martyn->friends[0] );
+		$this->assertEquals( $friends[0], $martyn->friends[0] );
     }
 
 	public function testPushWithArrayValueAndHasMongoIdConvertsToPushUpdateWhenEachIsFalse()
     {
 		// the return value from the find
-		$article = ArticleUnit::findOne();
+		$article = ArticleIntegrated::findOne();
 
 		$photoIds = array(
 			1, 2, 3,

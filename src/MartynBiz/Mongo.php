@@ -117,24 +117,52 @@ abstract class Mongo
 		// if value of $name is a dbref, then convert it to it's object
 		if (\MongoDBRef::isRef($value)) {
 
-			// get the dbref item
-			$data = Connection::getInstance()->findOne($value['$ref'], array(
-				'_id' => $value['$id'],
-			));
+			// // get the dbref item
+			// $data = Connection::getInstance()->findOne($value['$ref'], array(
+			// 	'_id' => $value['$id'],
+			// ));
+
+			$dbref = $value;
 
 			// we have the data for the ref, but connection has the classmap
-			$className = Connection::getInstance()->getCollectionClassNameFromClassMap($value['$ref']);
+			$className = Connection::getInstance()->getCollectionClassNameFromClassMap($dbref['$ref']);
 			$value = new $className();
 
-			// as some data might not be present in the whitelist, we need to directly
-			// assign
-			foreach ($data as $k => $v) {
-				$value->$k = $v;
-			}
+			$value->load(array(
+				'_id' => $dbref['$id'],
+			));
 
+			// // as some data might not be present in the whitelist, we need to directly
+			// // assign
+			// // TODO use load(array('_id' => ...))
+			// foreach ($data as $k => $v) {
+			// 	$value->$k = $v;
+			// }
+// var_dump($value->toArray()); exit;
 			// cache the new object so we don't have to do this every time we fetch a
 			// property from this dbref
 			$this->data[$name] = $value;
+		}
+
+		// if value is an array, it is possibly an array of DBRefs. In which case we
+		// should convert to models
+		if (is_array($value) and !\MongoDBRef::isRef($value)) {
+			array_walk($value, function (&$item, $key) use ($name) {
+				if (\MongoDBRef::isRef($item)) {
+					$dbref = $item;
+
+					// we have the data for the ref, but connection has the classmap
+					$className = Connection::getInstance()->getCollectionClassNameFromClassMap($dbref['$ref']);
+
+					$item = new $className();
+
+					$item->load(array(
+						'_id' => $dbref['$id'],
+					));
+
+					$this->data[$name][$key] = $item;
+				}
+			});
 		}
 
 		// check if a custom getter has been defined for this class

@@ -24,6 +24,7 @@ class UserUnit extends Mongo
 		'last_name',
 		'email',
 		'friend',
+		'friends',
 		'article',
 		'articles',
 	);

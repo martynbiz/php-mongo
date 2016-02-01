@@ -34,6 +34,20 @@ class MongoTest extends MongoTestAbstract
 		$this->assertEquals('getter', $user->first_name);
     }
 
+	public function testSetWhenValueIsArray()
+    {
+		$user = new UserUnit();
+
+		$user->set(array(
+			'first_name' => 'Martyn',
+			'last_name' => 'Bissett',
+		));
+
+		// assertions
+		$this->assertEquals('Martyn', $user->first_name);
+		$this->assertEquals('Bissett', $user->last_name);
+    }
+
 	public function testProperyReturnsNullWhenDoesNotExist()
     {
 		$user = new UserUnit();

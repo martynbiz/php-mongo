@@ -3,7 +3,7 @@
 // TODO access properties like: $user['username'] or $user->username
 // TODO test: findOne, find, load with Mongo and MongoIterator in $query
 
-namespace MartynBiz;
+namespace MartynBiz\Mongo;
 
 /**
  * Abstract class for creating mongo models

@@ -1,7 +1,7 @@
 <?php
 
 use MartynBiz\Mongo\MongoIterator;
-use MartynBiz\Mongo;
+use MartynBiz\Mongo\Mongo;
 
 /**
  * Just a basic one to test toArray

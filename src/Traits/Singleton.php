@@ -1,11 +1,11 @@
 <?php
 
-namespace MartynBiz\Mongo;
+namespace MartynBiz\Mongo\Traits;
 
 /**
  * Can be re-used for anything that requires singleton pattern
  */
-trait SingletonTrait
+trait Singleton
 {
     /**
      * @var Singleton The reference to *Singleton* instance of this class

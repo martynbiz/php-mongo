@@ -1,6 +1,6 @@
 <?php
 
-use MartynBiz\Mongo;
+use MartynBiz\Mongo\Mongo;
 use MartynBiz\Mongo\Connection;
 
 class MongoTest extends MongoTestAbstract

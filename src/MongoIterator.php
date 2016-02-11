@@ -2,7 +2,7 @@
 
 namespace MartynBiz\Mongo;
 
-use MartynBiz\Mongo;
+use MartynBiz\Mongo\Mongo;
 
 class MongoIterator extends \ArrayIterator {
     private $position = 0;

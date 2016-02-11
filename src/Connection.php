@@ -2,7 +2,7 @@
 
 namespace MartynBiz\Mongo;
 
-use MartynBiz\Mongo\SingletonTrait;
+use MartynBiz\Mongo\Traits\Singleton as SingletonTrait;
 
 /**
  * This is the mongo db connection singleton instance class. It is only concerned

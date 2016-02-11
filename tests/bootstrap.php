@@ -2,7 +2,7 @@
 
 require_once realpath(__DIR__ . '/../vendor/autoload.php');
 
-use MartynBiz\Mongo;
+use MartynBiz\Mongo\Mongo;
 // use MartynBiz\Mongo\Connection;
 
 /**

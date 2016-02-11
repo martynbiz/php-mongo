@@ -85,7 +85,7 @@ $user = User::find(array(
 
 Getting and setting values
 
-```
+```php
 // setting
 
 // on instantiation -- will be filtered against $whitelist

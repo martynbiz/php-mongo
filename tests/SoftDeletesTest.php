@@ -3,7 +3,7 @@
 // TODO test when app sets id and _id for insert
 // TODO test set can accept an array too
 
-use MartynBiz\Mongo;
+use MartynBiz\Mongo\Mongo;
 use MartynBiz\Mongo\Connection;
 use MartynBiz\Mongo\Traits\SoftDeletes;
 

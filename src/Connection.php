@@ -67,6 +67,8 @@ class Connection
 
         // $this->client = new \MongoClient($uri, $mongoOptions);
         $this->client = new \MongoClient($uri, $mongoOptions);
+
+        return $this;
 	}
 
 	/**

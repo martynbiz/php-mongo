@@ -1,12 +1,14 @@
 ## Installation ##
 
-Install with composer:
+### Install with composer ###
 
 ```
 "martynbiz/php-mongo": "dev-master"
 ```
 
-After that, setup the connection.
+## Getting started ##
+
+### Create connection ###
 
 ```php
 Connection::getInstance()->init(array(
@@ -19,7 +21,19 @@ Connection::getInstance()->init(array(
 ));
 ```
 
-## Usage ##
+### Create multiple connections ###
+
+```php
+Connection::getInstance('conn1')->init(array(
+    ...
+));
+
+Connection::getInstance('conn2')->init(array(
+    ...
+));
+```
+
+### Create model ###
 
 Create models by extending the Mongo class, be sure to define $collection and $whitelist:
 
@@ -43,7 +57,9 @@ class User extends mongo
 }
 ```
 
-Find by mongo query
+## Queries ##
+
+### Find by mongo query ###
 
 ```php
 // statically
@@ -52,12 +68,13 @@ $users = User::find(array(
 ));
 
 // dynamically
-$users = (new User())->find(array(
+$col = new User();
+$users = $col->find(array(
     'status' => 1,
 ));
 ```
 
-Find one by mongo query
+### Find one by mongo query ###
 
 ```php
 // statically
@@ -66,12 +83,13 @@ $user = User::findOne(array(
 ));
 
 // dynamically
-$user = User::findOne(array(
+$col = new User();
+$user = col->findOne(array(
     'email' => 'info@examle.com',
 ));
 ```
 
-Finding by object
+### Finding by object ###
 
 ```php
 $friend = User::findOne(array(
@@ -79,11 +97,11 @@ $friend = User::findOne(array(
 ));
 
 $user = User::find(array(
-    'friend' => friend,
+    'friend' => $friend,
 ));
 ```
 
-Getting and setting values
+### Getting and setting values ###
 
 ```php
 // setting
@@ -134,7 +152,7 @@ echo $article->get('author');
 ```
 
 
-Inserting
+### Inserting ###
 
 Save method is used on an instantiated object of the model class. It can be called
 after assigning values to properties, or by passing name/values as arguments.
@@ -187,23 +205,7 @@ $user->save();
 Although having multiple methods may seem a little much, it does give the option to
 keep you code tidy and more flexible for mocking methods during testing.
 
-Deleting
-
-An instance can delete itself from the datavbase with the delete method:
-
-```php
-$user->delete();
-```
-
-To delete multiple documents from a collection by query, use the remove method:
-
-```php
-User::remove(array(
-    'type' => 'boring',
-), $options);
-```
-
-Push
+### Push ###
 
 Note: push with $each is the default behaviour here, although this can be overridden with
 'each'=>false in the options array (see below)
@@ -243,9 +245,24 @@ $user->push(array(
 ), array('each' => false));
 ```
 
+### Deleting ###
+
+An instance can delete itself from the datavbase with the delete method:
+
+```php
+$user->delete();
+```
+
+To delete multiple documents from a collection by query, use the remove method:
+
+```php
+User::remove(array(
+    'type' => 'boring',
+), $options);
+```
 
 
-Convert to array
+### Convert to array ###
 
 ```php
 $user->toArray(3); // convert nested 3 deep to array (optional)

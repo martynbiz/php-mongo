@@ -10,29 +10,29 @@ trait Singleton
     /**
      * @var Singleton The reference to *Singleton* instance of this class
      */
-    private static $instance;
+    private static $instances = array();
 
     /**
      * Returns the *Singleton* instance of this class.
      *
      * @return Singleton The *Singleton* instance.
      */
-    public static function getInstance()
+    public static function getInstance($name='default')
     {
-        if (null === static::$instance) {
-            static::$instance = new static();
+        if (! isset(static::$instances[$name])) {
+            static::$instances[$name] = new static();
         }
 
-        return static::$instance;
+        return static::$instances[$name];
     }
 
     /**
      * Allows the instance to be swapped during tests
 	 * @param Connection $instance New instance
      */
-    public static function setInstance(self $instance)
+    public static function setInstance(self $instance, $name='default')
     {
-        static::$instance = $instance;
+        static::$instances[$name] = $instance;
     }
 
 	/**
@@ -40,9 +40,13 @@ trait Singleton
      * tests as the same instance will be used for unit and integrated tests)
 	 * @return void
 	 */
-	public function resetInstance()
+	public function resetInstance($name=null)
 	{
-		static::$instance = null;
+        if (is_null($name)) {
+            static::$instances = array();
+        } else {
+            unset(static::$instances[$name]);
+        }
 	}
 
     /**

@@ -57,6 +57,25 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
         $this->assertTrue($this->connection instanceof Connection);
     }
 
+	public function testMultipleInstances()
+    {
+		$conn1 = Connection::getInstance('conn1')->init( array(
+			'classmap' => array(
+				'users' => 'User',
+			),
+		) );
+
+		$conn2 = Connection::getInstance('conn2')->init( array(
+			'classmap' => array(
+				'users' => 'Articles',
+			),
+		) );
+
+		$this->assertEquals($conn1, Connection::getInstance('conn1'));
+		$this->assertEquals($conn2, Connection::getInstance('conn2'));
+		$this->assertNotEquals(spl_object_hash($conn1), spl_object_hash($conn2));
+    }
+
 	public function testFindReturnsArray()
     {
 		$collection = 'users';

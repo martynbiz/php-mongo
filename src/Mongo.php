@@ -18,7 +18,7 @@ use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedExceptio
 use MartynBiz\Mongo\Exception\NotFound as NotFoundException;
 use MartynBiz\Mongo\Exception\MissingId as MissingIdException;
 
-abstract class Mongo
+abstract class Mongo implements \ArrayAccess
 {
 	/**
 	 * @var string
@@ -70,6 +70,22 @@ abstract class Mongo
 		// Merge $data with the protected $data
 		$this->data = array_merge($this->data, $data); //$this->updated);
 	}
+
+	public function offsetSet($name, $value) {
+        $this->data[$name] = $value;
+    }
+
+    public function offsetGet($name) {
+        return isset($this->data[$name]) ? $this->data[$name] : null;
+    }
+
+    public function offsetExists($name) {
+        return isset($this->data[$name]);
+    }
+
+    public function offsetUnset($name) {
+        unset($this->data[$name]);
+    }
 
 	/**
 	 * Get the object properties in $data
@@ -661,5 +677,3 @@ abstract class Mongo
 		$data = array_intersect_key($data, array_flip(static::$whitelist));
 	}
 }
-
-?>

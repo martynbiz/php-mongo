@@ -21,20 +21,6 @@ Connection::getInstance()->init(array(
 ));
 ```
 
-### Create multiple connections ###
-
-Useful if you need to connect to multiple databases:
-
-```php
-Connection::getInstance('conn1')->init(array(
-    ...
-));
-
-Connection::getInstance('conn2')->init(array(
-    ...
-));
-```
-
 ### Create model ###
 
 Create models by extending the Mongo class, be sure to define $collection and $whitelist:
@@ -46,9 +32,6 @@ use MartynBiz\Mongo;
 
 class User extends mongo
 {
-    // optional - if using multiple connections/databases
-    protected static $conn = 'conn1';
-
     // required - collection this model refers to
     protected static $collection = 'users';
 
@@ -59,6 +42,39 @@ class User extends mongo
         'username',
         'password',
     );
+}
+```
+
+### Create multiple connections ###
+
+If only using a single database, this is not neccessary. However, if you need to
+connect to multiple databases, give a unique name to each connection:
+
+```php
+Connection::getInstance('conn1')->init(array(
+    ...
+));
+
+Connection::getInstance('conn2')->init(array(
+    ...
+));
+```
+
+Also, remember to declare which $conn in the model:
+
+```php
+<?php
+
+use MartynBiz\Mongo;
+
+class User extends mongo
+{
+    // optional - if using multiple connections/databases
+    protected static $conn = 'conn1';
+
+    .
+    .
+    .
 }
 ```
 
@@ -95,6 +111,9 @@ $user = $col->findOne(array(
 ```
 
 ### Finding by object ###
+
+Model instances can also be passed, the find method will convert it to DBRef
+internally (e.g. 'friend' => $friend will do the same as 'friend' => $friend->getDBRef())
 
 ```php
 $friend = User::findOne(array(
@@ -372,9 +391,4 @@ class User extends Mongo
 
 
 TODO
-* more testing of multiple connections
-* nested properties (e.g. model.name)
-*
-
-tests
-* move test models into models/
+* dot syntax support? find(array('model.name' => 'Martyn')), set/get(array(model.name' => 'Martyn'))

@@ -95,6 +95,51 @@ class IntegratedTest extends TestCase
 		ArticleIntegrated::remove(array());
 	}
 
+	public function testGetSetWithNestedProperties()
+    {
+		$user = new UserIntegrated();
+		$user->set('simple', 1);
+		$user->set('model.friend_count', 5);
+		$user->set('model.enemy_count', 3);
+		$user->set('model.long.nested.property', 3);
+
+		// set with just an array
+		$user->set(array(
+			'model' => array(
+				'another' => array(
+					'property' => 'yatta!',
+				),
+			)
+		));
+
+		// this should overwrite the "yatta!"
+		$user->set(array(
+			'model' => array(
+				'another' => array(
+					'property' => 'overwritten',
+				),
+			)
+		));
+
+		// another overwrite
+		$user->set('model.long.nested.property', 33);
+
+		// assertions
+		$this->assertEquals(1, $user->get('simple'));
+		$this->assertEquals(array(
+			'friend_count' => 5,
+			'enemy_count' => 3,
+			'long' => array(
+				'nested' => array(
+					'property' => 33,
+				)
+			),
+			'another' => array(
+				'property' => 'overwritten',
+			)
+		), $user->get('model'));
+    }
+
 	public function testGetWhenValueIsArrayOfDBRefsReturnsModelInstances()
     {
 		$user = new UserIntegrated();

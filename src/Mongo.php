@@ -182,10 +182,33 @@ abstract class Mongo
 				$value = $this->$setterMethod($value);
 			}
 
+			// TODO can this be tidier, seems strange to pass $value twice (one for &ref, the other for value)
+			// .. maybe try a Closure within the method to accomodate the &ref?
+			$this->convertDotSyntaxNameToNestedArray($value, $name, $value);
+// var_dump($value); exit;
 			// set the update property so it knows what fields have changed
-			$this->data[$name] = $value;
+			$this->data = array_replace_recursive($this->data, $value);
 		}
 	}
+
+	/**
+	 * This will convert a dot syntax name such as 'model.name' to nested arrays
+	 * @param mixed &$arr This is the value to be updated (converted to arrays)
+	 * @param string $name The name, possible dot notation (e.g. "model.name.en")
+	 * @param mixed $value This is the value of the last property in the dot notation (e.g. "en")
+	 * @return null
+	 */
+	public function convertDotSyntaxNameToNestedArray(&$arr, $name, $value, $separator='.') {
+		$arr = array();
+
+		$keys = explode($separator, $name);
+
+        foreach ($keys as $key) {
+            $arr = &$arr[$key];
+        }
+
+        $arr = $value;
+    }
 
 	/**
 	 * @param array $query

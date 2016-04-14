@@ -23,6 +23,8 @@ Connection::getInstance()->init(array(
 
 ### Create multiple connections ###
 
+Useful if you need to connect to multiple databases:
+
 ```php
 Connection::getInstance('conn1')->init(array(
     ...
@@ -44,11 +46,14 @@ use MartynBiz\Mongo;
 
 class User extends mongo
 {
-    // collection this model refers to
-    protected $collection = 'users';
+    // optional - if using multiple connections/databases
+    protected static $conn = 'conn1';
 
-    // define on the fields that can be saved
-    protected $whitelist = array(
+    // required - collection this model refers to
+    protected static $collection = 'users';
+
+    // required - define on the fields that can be saved
+    protected static $whitelist = array(
         'name',
         'email',
         'username',
@@ -84,7 +89,7 @@ $user = User::findOne(array(
 
 // dynamically
 $col = new User();
-$user = col->findOne(array(
+$user = $col->findOne(array(
     'email' => 'info@examle.com',
 ));
 ```
@@ -137,7 +142,7 @@ $article->save(array(
 ))
 ```
 
-```
+```php
 // getting
 
 $article = Article::findOne(array(
@@ -180,7 +185,8 @@ $user = User::create(array(
 ));
 
 // dynamically (e.g. service locator pattern, or DI)
-$user = (new User())->create(array(
+$col = new User();
+$user = $col->create(array(
     'name' => 'Jim',
 ));
 ```
@@ -195,7 +201,8 @@ $user = User::factory(array(
 ));
 
 // dynamically
-$user = (new User())->factory(array(
+$col = new User();
+$user = $col->factory(array(
     'name' => 'Jim',
 ));
 
@@ -247,7 +254,7 @@ $user->push(array(
 
 ### Deleting ###
 
-An instance can delete itself from the datavbase with the delete method:
+An instance can delete itself from the database with the delete method:
 
 ```php
 $user->delete();
@@ -282,6 +289,8 @@ class User extends mongo
     .
     public function validate()
     {
+        $this->resetErrors();
+
         if (empty($this->data['name'])) {
             $this->setError('Name is missing.');
         }
@@ -332,7 +341,7 @@ class User extends mongo
 }
 ```
 
-### Custom Getter ###
+### Custom Getter/ Setter ###
 
 To automatically convert values when getting, you can define custom methods
 to automatically convert the value of a property. This may be useful when formatting
@@ -353,12 +362,19 @@ class User extends Mongo
     {
         return date('Y-M-d h:i:s', $this->data['created_at']->sec);
     }
+
+    public function setPassword($value)
+    {
+        return password_hash($value, PASSWORD_BCRYPT);
+    }
 }
 ```
 
 
 TODO
-* test that find/findOne are converting $query's Mongo and MongoIterator to DBRefs
+* more testing of multiple connections
+* nested properties (e.g. model.name)
+*
 
 tests
 * move test models into models/

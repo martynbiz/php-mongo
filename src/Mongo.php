@@ -2,6 +2,7 @@
 // TODO paginate
 // TODO access properties like: $user['username'] or $user->username
 // TODO test: findOne, find, load with Mongo and MongoIterator in $query
+// TODO nested properties? e.g. 'model.name' - needs tested
 
 namespace MartynBiz\Mongo;
 
@@ -19,6 +20,11 @@ use MartynBiz\Mongo\Exception\MissingId as MissingIdException;
 
 abstract class Mongo
 {
+	/**
+	 * @var string
+	 */
+	protected static $conn = 'default';
+
 	/**
 	 * @var string
 	 */
@@ -41,13 +47,6 @@ abstract class Mongo
 	 */
 	protected $errors = array();
 
-	// /**
-	//  * When new values are written, this will flag that the object is unsaved
-	//  * Also, prevents us hitting the database when there is nothing updated
-	//  * @var array
-	//  */
-	// protected $isDirty = false;
-
 	/**
 	 * Options e.g. database, user, password, etc
 	 * @var array
@@ -67,9 +66,6 @@ abstract class Mongo
 
 		// filter $data against $whitelist
 		static::filterValues($data);
-
-		// // store the data in the data property
-		// $this->updated = array_merge($this->data, $data);
 
 		// Merge $data with the protected $data
 		$this->data = array_merge($this->data, $data); //$this->updated);
@@ -117,28 +113,16 @@ abstract class Mongo
 		// if value of $name is a dbref, then convert it to it's object
 		if (\MongoDBRef::isRef($value)) {
 
-			// // get the dbref item
-			// $data = Connection::getInstance()->findOne($value['$ref'], array(
-			// 	'_id' => $value['$id'],
-			// ));
-
 			$dbref = $value;
 
 			// we have the data for the ref, but connection has the classmap
-			$className = Connection::getInstance()->getCollectionClassNameFromClassMap($dbref['$ref']);
+			$className = Connection::getInstance(self::$conn)->getCollectionClassNameFromClassMap($dbref['$ref']);
 			$value = new $className();
 
 			$value->load(array(
 				'_id' => $dbref['$id'],
 			));
 
-			// // as some data might not be present in the whitelist, we need to directly
-			// // assign
-			// // TODO use load(array('_id' => ...))
-			// foreach ($data as $k => $v) {
-			// 	$value->$k = $v;
-			// }
-// var_dump($value->toArray()); exit;
 			// cache the new object so we don't have to do this every time we fetch a
 			// property from this dbref
 			$this->data[$name] = $value;
@@ -152,7 +136,7 @@ abstract class Mongo
 					$dbref = $item;
 
 					// we have the data for the ref, but connection has the classmap
-					$className = Connection::getInstance()->getCollectionClassNameFromClassMap($dbref['$ref']);
+					$className = Connection::getInstance(self::$conn)->getCollectionClassNameFromClassMap($dbref['$ref']);
 
 					$item = new $className();
 
@@ -191,6 +175,7 @@ abstract class Mongo
 		}
 
 		foreach ($data as $name => $value) {
+
 			// check if a custom getter has been defined for this class
 			$setterMethod = 'set' . Utils::snakeCaseToCamelCase($name);
 			if (method_exists($this, $setterMethod)) {
@@ -209,23 +194,10 @@ abstract class Mongo
 	 */
 	public static function find($query=array(), $options=array())
 	{
-		// loop through each $value and check if we need to convert
-		// objects to dbrefs
-		// TODO replace this with a function convertArrayItemsToDBRefs() and
-		//   use in find, findOne, and save
-		foreach($query as &$value) {
-			if ($value instanceof Mongo) {
-				$value = $value->getDBRef();
-			} elseif ($value instanceof MongoIterator) {
-				$newValue = []; // we'll build up an array
-				foreach($value as $model) {
-					array_push($newValue, $model->getDBRef());
-				}
-				$value = $newValue;
-			}
-		}
+		// convert Mongo/ MongoIterator instances to dbrefs
+		self::convertArrayItemsToDBRefs($query);
 
-		$result = Connection::getInstance()->find(static::$collection, $query, $options);
+		$result = Connection::getInstance(self::$conn)->find(static::$collection, $query, $options);
 
 		// if result from find is null, return empty array
 		if (! $result) {
@@ -251,23 +223,10 @@ abstract class Mongo
 	 */
 	public static function findOne($query=array(), $options=array())
 	{
-		// loop through each $value and check if we need to convert
-		// objects to dbrefs
-		// TODO replace this with a function convertArrayItemsToDBRefs() and
-		//   use in find, findOne, and save
-		foreach($query as &$value) {
-			if ($value instanceof Mongo) {
-				$value = $value->getDBRef();
-			} elseif ($value instanceof MongoIterator) {
-				$newValue = []; // we'll build up an array
-				foreach($value as $model) {
-					array_push($newValue, $model->getDBRef());
-				}
-				$value = $newValue;
-			}
-		}
+		// convert Mongo/ MongoIterator instances to dbrefs
+		self::convertArrayItemsToDBRefs($query);
 
-		$result = Connection::getInstance()->findOne(static::$collection, $query, $options);
+		$result = Connection::getInstance(self::$conn)->findOne(static::$collection, $query, $options);
 
 		// if result from findOne is null, return null
 		if (! $result) {
@@ -285,23 +244,10 @@ abstract class Mongo
 	 */
 	public function load($query=array(), $options=array())
 	{
-		// loop through each $value and check if we need to convert
-		// objects to dbrefs
-		// TODO replace this with a function convertArrayItemsToDBRefs() and
-		//   use in find, findOne, and save
-		foreach($query as &$value) {
-			if ($value instanceof Mongo) {
-				$value = $value->getDBRef();
-			} elseif ($value instanceof MongoIterator) {
-				$newValue = []; // we'll build up an array
-				foreach($value as $model) {
-					array_push($newValue, $model->getDBRef());
-				}
-				$value = $newValue;
-			}
-		}
+		// convert Mongo/ MongoIterator instances to dbrefs
+		self::convertArrayItemsToDBRefs($query);
 
-		$result = Connection::getInstance()->findOne(static::$collection, $query, $options);
+		$result = Connection::getInstance(self::$conn)->findOne(static::$collection, $query, $options);
 
 		// if result from findOne is null, return null
 		if (! $result) {
@@ -338,9 +284,6 @@ abstract class Mongo
 	{
 		// first, reset errors for this validation check
 		$this->resetErrors();
-
-		// validation code here
-		// e.g. if empty($this->data['name']) $this->setError('Name missing');
 
 		// return true if errors is empty
 		return empty( $this->getErrors() );
@@ -430,19 +373,8 @@ abstract class Mongo
 		// These are the values we'll save with
 		$values = $this->data;
 
-		// loop through each $value and check if we need to convert
-		// objects to dbrefs
-		foreach($values as &$value) {
-			if ($value instanceof Mongo) {
-				$value = $value->getDBRef();
-			} elseif ($value instanceof MongoIterator) {
-				$newValue = []; // we'll build up an array
-				foreach($value as $model) {
-					array_push($newValue, $model->getDBRef());
-				}
-				$value = $newValue;
-			}
-		}
+		// convert Mongo/ MongoIterator instances to dbrefs
+		self::convertArrayItemsToDBRefs($values);
 
 		// determine whether this is an insert or update
 		if (isset($this->data['_id'])) {
@@ -461,7 +393,7 @@ abstract class Mongo
 			);
 
 			// update
-			$result = Connection::getInstance()->update(static::$collection, array(
+			$result = Connection::getInstance(self::$conn)->update(static::$collection, array(
 				'_id' => $this->data['_id'],
 			), $values, $options);
 
@@ -473,15 +405,12 @@ abstract class Mongo
 			));
 
 			// insert - will return _id for us too
-			$result = Connection::getInstance()->insert(static::$collection, $values);
+			$result = Connection::getInstance(self::$conn)->insert(static::$collection, $values);
 
 		}
 
 		// merge values into data - if insert, will add id and _id
 		$this->data = array_merge($this->data, $values);
-
-		// // reset updated as data has been written
-		// $this->updated = array();
 
 		return $result;
 	}
@@ -545,12 +474,12 @@ abstract class Mongo
 			$update['$push'][$property] = $value;
 		}
 
-		$result = Connection::getInstance()->update(static::$collection, array(
+		$result = Connection::getInstance(self::$conn)->update(static::$collection, array(
 			'_id' => $this->data['_id'],
 		), $update);
 
 		// now update updated_at coz we can't do that with the $push update
-		Connection::getInstance()->update(static::$collection, array(
+		Connection::getInstance(self::$conn)->update(static::$collection, array(
 			'_id' => $this->data['_id'],
 		), array(
 			'$set' => array(
@@ -583,7 +512,7 @@ abstract class Mongo
 			'justOne' => true,
 		);
 
-		return Connection::getInstance()->delete(static::$collection, $query, $options);
+		return Connection::getInstance(self::$conn)->delete(static::$collection, $query, $options);
 	}
 
 	/**
@@ -593,7 +522,7 @@ abstract class Mongo
 	 */
 	public static function remove($query, $options=array())
 	{
-		return Connection::getInstance()->delete(static::$collection, $query, $options);
+		return Connection::getInstance(self::$conn)->delete(static::$collection, $query, $options);
 	}
 
 	/**
@@ -602,7 +531,7 @@ abstract class Mongo
 	 */
 	public function getConnection()
 	{
-		return Connection::getInstance();
+		return Connection::getInstance(self::$conn);
 	}
 
 	/**
@@ -638,7 +567,7 @@ abstract class Mongo
 				}
 			} elseif (\MongoDBRef::isRef($value)) {
 				if ($deep > 0) {
-					$value = Connection::getInstance()->findOne($value['$ref'], array(
+					$value = Connection::getInstance(self::$conn)->findOne($value['$ref'], array(
 						'_id' => $value['$id'],
 					));
 				} else {
@@ -674,6 +603,28 @@ abstract class Mongo
 		}
 
 		return $obj;
+	}
+
+	/**
+	 * Will accept Mongo/ MongoIterator instances and convert them to DBRefs for find, findOne etc
+	 * @param array $query
+	 * @return mixed
+	 */
+	protected static function convertArrayItemsToDBRefs(&$query=array())
+ 	{
+		foreach($query as &$value) {
+			if ($value instanceof Mongo) {
+				$value = $value->getDBRef();
+			} elseif ($value instanceof MongoIterator) {
+				$newValue = []; // we'll build up an array
+				foreach($value as $model) {
+					array_push($newValue, $model->getDBRef());
+				}
+				$value = $newValue;
+			}
+		}
+
+		return $query;
 	}
 
 	/**

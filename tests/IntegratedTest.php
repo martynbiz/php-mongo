@@ -34,8 +34,16 @@ class IntegratedTest extends TestCase
 
 	public function setup()
 	{
-		$options = array(
+		$optionsDefault = array(
 			'db' => 'phpmongo_test',
+			'classmap' => array(
+				'users' => 'UserIntegrated',
+				'articles' => 'ArticleIntegrated',
+			),
+		);
+
+		$optionsConn2 = array(
+			'db' => 'phpmongo_test2',
 			'classmap' => array(
 				'users' => 'UserIntegrated',
 				'articles' => 'ArticleIntegrated',
@@ -45,8 +53,11 @@ class IntegratedTest extends TestCase
 		// reset Connection as it's being used across multiple tests (unit, int)
 		Connection::getInstance()->resetInstance();
 
-		// set options such as classmap
-		Connection::getInstance()->init($options);
+		// set default connection
+		Connection::getInstance()->init($optionsDefault);
+
+		// set second connection
+		Connection::getInstance('conn2')->init($optionsConn2);
 
 
 		// create some fixtures

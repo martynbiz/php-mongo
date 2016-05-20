@@ -34,6 +34,19 @@ class MongoTest extends MongoTestAbstract
 		$this->assertEquals('getter', $user->first_name);
     }
 
+	public function testCustomGetterSetterMethodsWithContructor()
+    {
+		$user = new UserCustomGetterSetter(array(
+			'first_name' => 'Getter',
+			'last_name' => 'Setter',
+		));
+
+		// assertions
+
+		$this->assertEquals('getter', $user->first_name);
+		$this->assertEquals('SETTER', $user->last_name);
+    }
+
 	public function testSetWhenValueIsArray()
     {
 		$user = new UserUnit();

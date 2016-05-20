@@ -27,4 +27,12 @@ class UserCustomGetterSetter extends Mongo
 	{
 		return strtolower($value);
 	}
+
+	/**
+	 * Custom getter
+	 */
+	public function setLastName($value)
+	{
+		return strtoupper($value);
+	}
 }

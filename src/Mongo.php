@@ -68,7 +68,8 @@ abstract class Mongo implements \ArrayAccess
 		static::filterValues($data);
 
 		// Merge $data with the protected $data
-		$this->data = array_merge($this->data, $data); //$this->updated);
+		// $this->data = array_merge($this->data, $data);
+		$this->set($data);
 	}
 
 	public function offsetSet($name, $value) {
@@ -201,7 +202,7 @@ abstract class Mongo implements \ArrayAccess
 			// TODO can this be tidier, seems strange to pass $value twice (one for &ref, the other for value)
 			// .. maybe try a Closure within the method to accomodate the &ref?
 			$this->convertDotSyntaxNameToNestedArray($value, $name, $value);
-// var_dump($value); exit;
+
 			// set the update property so it knows what fields have changed
 			$this->data = array_replace_recursive($this->data, $value);
 		}

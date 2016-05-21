@@ -68,8 +68,8 @@ abstract class Mongo implements \ArrayAccess
 		static::filterValues($data);
 
 		// Merge $data with the protected $data
-		// $this->data = array_merge($this->data, $data);
-		$this->set($data);
+		$this->data = array_merge($this->data, $data);
+		// $this->set($data);
 	}
 
 	public function offsetSet($name, $value) {
@@ -190,7 +190,7 @@ abstract class Mongo implements \ArrayAccess
 				$data => $value,
 			);
 		}
-
+// var_dump($data);
 		foreach ($data as $name => $value) {
 
 			// check if a custom getter has been defined for this class
@@ -384,6 +384,7 @@ abstract class Mongo implements \ArrayAccess
 	{
 		$className = get_called_class();
 		$obj = new $className($data);
+		$obj->set($data);
 		return $obj;
 	}
 
@@ -402,7 +403,8 @@ abstract class Mongo implements \ArrayAccess
 		$this->filterValues($data);
 
 		// merge passed in values too
-		$this->data = array_merge($this->data, $data);
+		// $this->data = array_merge($this->data, $data);
+		$this->set($data);
 
 		// call valdidate method, this may be a user defined validate method
 		// by default though, this will return true and never really interfere

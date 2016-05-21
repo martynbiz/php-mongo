@@ -25,7 +25,7 @@ class UserCustomGetterSetter extends Mongo
 	 */
 	public function getFirstName($value)
 	{
-		return strtolower($value);
+		return md5($value);
 	}
 
 	/**
@@ -33,6 +33,6 @@ class UserCustomGetterSetter extends Mongo
 	 */
 	public function setLastName($value)
 	{
-		return strtoupper($value);
+		return md5(md5($value));
 	}
 }

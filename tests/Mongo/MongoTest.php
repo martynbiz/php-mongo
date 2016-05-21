@@ -27,24 +27,38 @@ class MongoTest extends MongoTestAbstract
     {
 		$user = new UserCustomGetterSetter();
 
-		$user->first_name = 'Getter';
+		$user->first_name = 'getter';
+		$user->last_name = 'setter';
 
 		// assertions
-
-		$this->assertEquals('getter', $user->first_name);
+		$this->assertEquals(md5('getter'), $user->first_name);
+		$this->assertEquals(md5(md5('setter')), $user->last_name);
     }
 
-	public function testCustomGetterSetterMethodsWithContructor()
+	public function testCustomGetterSetterMethodsWithSave()
     {
-		$user = new UserCustomGetterSetter(array(
-			'first_name' => 'Getter',
-			'last_name' => 'Setter',
+		$user = new UserCustomGetterSetter();
+
+		$user->save(array(
+			'first_name' => 'getter',
+			'last_name' => 'setter',
 		));
 
 		// assertions
+		$this->assertEquals(md5('getter'), $user->first_name);
+		$this->assertEquals(md5(md5('setter')), $user->last_name);
+    }
 
-		$this->assertEquals('getter', $user->first_name);
-		$this->assertEquals('SETTER', $user->last_name);
+	public function testCustomGetterSetterMethodsWithFactory()
+    {
+		$user = UserCustomGetterSetter::factory(array(
+			'first_name' => 'getter',
+			'last_name' => 'setter',
+		));
+
+		// assertions
+		$this->assertEquals(md5('getter'), $user->first_name);
+		$this->assertEquals(md5(md5('setter')), $user->last_name);
     }
 
 	public function testSetWhenValueIsArray()
@@ -179,9 +193,7 @@ class MongoTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$collectionName = 'users';
-		$userData = $this->getUserData(array(
-			'created_at' => new \MongoDate(time()),
-		));
+		$userData = $this->getUserData();
 		unset($userData['_id']);
 
 		$this->connectionMock
@@ -191,7 +203,7 @@ class MongoTest extends MongoTestAbstract
 		$user = (new UserUnit())->factory($userData);
 
 		$this->assertTrue($user instanceof UserUnit);
-
+// var_dump($user->created_at); exit;
 		// created_at timestamp
 		$this->assertFalse(isset($user->created_at));
     }

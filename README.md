@@ -11,7 +11,7 @@
 ### Create connection ###
 
 ```php
-Connection::getInstance()->init(array(
+\MartynBiz\Mongo\Connection::getInstance()->init(array(
     'db' => 'mydb',
     'username' => 'myuser',
     'password' => '89dD7HH7di!89',
@@ -30,7 +30,7 @@ Create models by extending the Mongo class, be sure to define $collection and $w
 
 use MartynBiz\Mongo;
 
-class User extends mongo
+class User extends Mongo
 {
     // required - collection this model refers to
     protected static $collection = 'users';
@@ -55,9 +55,12 @@ Connection::getInstance('conn1')->init(array(
     ...
 ));
 
-Connection::getInstance('conn2')->init(array(
-    ...
-));
+// also, checking if an instance exists 
+if (! Connection::hasInstance('conn2')) {
+    Connection::getInstance('conn2')->init(array(
+        ...
+    ));
+}
 ```
 
 Also, remember to declare which $conn in the model:

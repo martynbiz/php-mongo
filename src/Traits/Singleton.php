@@ -19,11 +19,21 @@ trait Singleton
      */
     public static function getInstance($name='default')
     {
-        if (! isset(static::$instances[$name])) {
+        if (! self::hasInstance($name)) {
             static::$instances[$name] = new static();
         }
 
         return static::$instances[$name];
+    }
+
+    /**
+     * Returns the *Singleton* instance of this class.
+     *
+     * @return Singleton The *Singleton* instance.
+     */
+    public static function hasInstance($name='default')
+    {
+        return isset(static::$instances[$name]);
     }
 
     /**

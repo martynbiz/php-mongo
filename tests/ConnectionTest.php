@@ -55,6 +55,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 	public function testInstantiation()
     {
         $this->assertTrue($this->connection instanceof Connection);
+		$this->assertTrue(Connection::hasInstance());
     }
 
 	public function testMultipleInstances()
@@ -72,7 +73,9 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		) );
 
 		$this->assertEquals($conn1, Connection::getInstance('conn1'));
+		$this->assertTrue(Connection::hasInstance('conn1'));
 		$this->assertEquals($conn2, Connection::getInstance('conn2'));
+		$this->assertTrue(Connection::hasInstance('conn2'));
 		$this->assertNotEquals(spl_object_hash($conn1), spl_object_hash($conn2));
     }
 

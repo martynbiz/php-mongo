@@ -3,7 +3,7 @@
 ### Install with composer ###
 
 ```
-"martynbiz/php-mongo": "dev-master"
+$ composer require martynbiz/php-mongo
 ```
 
 ## Getting started ##
@@ -55,7 +55,7 @@ Connection::getInstance('conn1')->init(array(
     ...
 ));
 
-// also, checking if an instance exists 
+// also, checking if an instance exists
 if (! Connection::hasInstance('conn2')) {
     Connection::getInstance('conn2')->init(array(
         ...

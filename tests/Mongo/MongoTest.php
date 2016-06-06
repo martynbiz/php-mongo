@@ -35,6 +35,18 @@ class MongoTest extends MongoTestAbstract
 		$this->assertEquals(md5(md5('setter')), $user->last_name);
     }
 
+	public function testCustomGetterSetterMethodsWhenUseCustomGetterSetterIsFalse()
+    {
+		$user = new UserCustomGetterSetter();
+
+		$user->set('first_name', 'getter');
+		$user->set('last_name', 'setter', false);
+
+		// assertions
+		$this->assertEquals('getter', $user->get('first_name', false));
+		$this->assertEquals('setter', $user->get('last_name'));
+    }
+
 	public function testCustomGetterSetterMethodsWithSave()
     {
 		$user = new UserCustomGetterSetter();

@@ -122,7 +122,7 @@ abstract class Mongo implements \ArrayAccess
 	 * @param string $name
 	 * @return mixed
 	 */
-	public function get($name)
+	public function get($name, $useCustomGetter=true)
 	{
 		// get the value from $data
 		$value = @$this->data[$name];
@@ -168,7 +168,7 @@ abstract class Mongo implements \ArrayAccess
 
 		// check if a custom getter has been defined for this class
 		$getterMethod = 'get' . Utils::snakeCaseToCamelCase($name);
-		if (method_exists($this, $getterMethod)) {
+		if ($useCustomGetter and method_exists($this, $getterMethod)) {
 			$value = $this->$getterMethod($value);
 		}
 
@@ -181,7 +181,7 @@ abstract class Mongo implements \ArrayAccess
 	 * @param string|array $data Name\value pairs to set, or can be string key
 	 * @param mixed $value
 	 */
-	public function set($data, $value=null)
+	public function set($data, $value=null, $useCustomSetter=true)
 	{
 		// as we're supporting arrays, we'll make even a name/value
 		// pair an array just so that we can use the same code later
@@ -195,7 +195,7 @@ abstract class Mongo implements \ArrayAccess
 
 			// check if a custom getter has been defined for this class
 			$setterMethod = 'set' . Utils::snakeCaseToCamelCase($name);
-			if (method_exists($this, $setterMethod)) {
+			if ($useCustomSetter and method_exists($this, $setterMethod)) {
 				$value = $this->$setterMethod($value);
 			}
 
@@ -369,7 +369,8 @@ abstract class Mongo implements \ArrayAccess
 	public static function create($data=array())
 	{
 		$className = get_called_class();
-		$obj = new $className($data);
+		$obj = new $className();
+		$obj->set($data);
 		$obj->save();
 		return $obj;
 	}
@@ -383,7 +384,7 @@ abstract class Mongo implements \ArrayAccess
 	public static function factory($data=array())
 	{
 		$className = get_called_class();
-		$obj = new $className($data);
+		$obj = new $className();
 		$obj->set($data);
 		return $obj;
 	}
@@ -641,7 +642,8 @@ abstract class Mongo implements \ArrayAccess
 		$obj = new static();
 
 		foreach($data as $key => $value) {
-			$obj->$key = $value;
+			// $obj->$key = $value;
+			$obj->set($key, $value, false);
 		}
 
 		return $obj;

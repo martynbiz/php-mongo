@@ -11,14 +11,15 @@ namespace MartynBiz\Mongo;
  */
 
 use MartynBiz\Mongo\Connection;
-use MartynBiz\Mongo\Utils;
 use MartynBiz\Mongo\MongoIterator;
+use MartynBiz\Mongo\Utils;
+
 use MartynBiz\Mongo\Exception\WhitelistEmpty as WhitelistEmptyException;
 use MartynBiz\Mongo\Exception\CollectionUndefined as CollectionUndefinedException;
 use MartynBiz\Mongo\Exception\NotFound as NotFoundException;
 use MartynBiz\Mongo\Exception\MissingId as MissingIdException;
 
-abstract class Mongo implements \ArrayAccess
+abstract class Mongo //implements \ArrayAccess
 {
 	/**
 	 * @var string
@@ -68,25 +69,26 @@ abstract class Mongo implements \ArrayAccess
 		static::filterValues($data);
 
 		// Merge $data with the protected $data
+		// Note: setter functions will not be applied here
 		$this->data = array_merge($this->data, $data);
 		// $this->set($data);
 	}
 
-	public function offsetSet($name, $value) {
-        $this->data[$name] = $value;
-    }
-
-    public function offsetGet($name) {
-        return isset($this->data[$name]) ? $this->data[$name] : null;
-    }
-
-    public function offsetExists($name) {
-        return isset($this->data[$name]);
-    }
-
-    public function offsetUnset($name) {
-        unset($this->data[$name]);
-    }
+	// public function offsetSet($name, $value) {
+    //     $this->data[$name] = $value;
+    // }
+	//
+    // public function offsetGet($name) {
+    //     return isset($this->data[$name]) ? $this->data[$name] : null;
+    // }
+	//
+    // public function offsetExists($name) {
+    //     return isset($this->data[$name]);
+    // }
+	//
+    // public function offsetUnset($name) {
+    //     unset($this->data[$name]);
+    // }
 
 	/**
 	 * Get the object properties in $data
@@ -110,7 +112,7 @@ abstract class Mongo implements \ArrayAccess
 	}
 
 	/**
-	 *
+	 * Is required for properties
 	 */
 	public function __isset($name)
 	{
@@ -190,7 +192,7 @@ abstract class Mongo implements \ArrayAccess
 				$data => $value,
 			);
 		}
-// var_dump($data);
+
 		foreach ($data as $name => $value) {
 
 			// check if a custom getter has been defined for this class
@@ -315,19 +317,19 @@ abstract class Mongo implements \ArrayAccess
 		return $result;
 	}
 
-	/**
-	 * This is the empty validate method, each model will defined their own
-	 * it is called during save
-	 * @return boolean
-	 */
-	public function validate()
-	{
-		// first, reset errors for this validation check
-		$this->resetErrors();
-
-		// return true if errors is empty
-		return empty( $this->getErrors() );
-	}
+	// /**
+	//  * This is the empty validate method, each model will defined their own
+	//  * it is called during save
+	//  * @return boolean
+	//  */
+	// public function validate()
+	// {
+	// 	// first, reset errors for this validation check
+	// 	$this->resetErrors();
+	//
+	// 	// return true if errors is empty
+	// 	return empty( $this->getErrors() );
+	// }
 
 	/**
 	 * Set push string error message or merge array error message
@@ -407,11 +409,11 @@ abstract class Mongo implements \ArrayAccess
 		// $this->data = array_merge($this->data, $data);
 		$this->set($data);
 
-		// call valdidate method, this may be a user defined validate method
-		// by default though, this will return true and never really interfere
-		if (! $this->validate() ) {
-			return false;
-		}
+		// // call valdidate method, this may be a user defined validate method
+		// // by default though, this will return true and never really interfere
+		// if (! $this->validate() ) {
+		// 	return false;
+		// }
 
 		// These are the values we'll save with
 		$values = $this->data;

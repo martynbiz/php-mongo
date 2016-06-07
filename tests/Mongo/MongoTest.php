@@ -215,7 +215,7 @@ class MongoTest extends MongoTestAbstract
 		$user = (new UserUnit())->factory($userData);
 
 		$this->assertTrue($user instanceof UserUnit);
-// var_dump($user->created_at); exit;
+
 		// created_at timestamp
 		$this->assertFalse(isset($user->created_at));
     }

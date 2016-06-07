@@ -2,23 +2,23 @@
 
 class MongoSaveTest extends MongoTestAbstract
 {
-	public function testSaveReturnsFalseWhenValidationFails()
-    {
-		// the return value from the find
-		$collectionName = 'users';
-		$userData = array(
-			// 'name' => 'Martyn',
-		);
+	// public function testSaveReturnsFalseWhenValidationFails()
+    // {
+	// 	// the return value from the find
+	// 	$collectionName = 'users';
+	// 	$userData = array(
+	// 		// 'name' => 'Martyn',
+	// 	);
+	//
+	// 	$this->connectionMock
+	// 		->expects( $this->never() )
+	// 		->method('insert');
+	//
+	// 	$user = new UserValidator($userData);
+	// 	$user->save();
+    // }
 
-		$this->connectionMock
-			->expects( $this->never() )
-			->method('insert');
-
-		$user = new UserValidator($userData);
-		$user->save();
-    }
-
-	public function testSaveInsertsWhenValidationSucceeds()
+	public function testSaveInserts()
     {
 		// the return value from the find
 		$collectionName = 'users';

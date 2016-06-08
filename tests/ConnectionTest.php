@@ -186,24 +186,23 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->connection->update($collectionName, $query, $values, $options);
     }
 
-	// public function testUpdateNeverCallsMongoDBUpdateWhenValuesEmpty()
-    // {
-	// 	$collectionName = 'users';
-	// 	$query = array(
-	// 		'$id' => '1234567890'
-	// 	);
-	// 	$values = array();
-	// 	$options = array(
-	// 		'multi' => true,
-	// 	);
-	//
-	// 	$this->collectionMock
-	// 		->expects( $this->never() )
-	// 		->method('update')
-	// 		->with($query, $values, $options);
-	//
-	// 	$this->connection->update($collectionName, $query, $values, $options);
-    // }
+	public function testGetSetAppendClassMap()
+    {
+		$classmap = Connection::getInstance()->getClassmap();
+		$this->assertEquals([ 'users' => 'User' ], $classmap);
+
+		Connection::getInstance()->setClassmap([
+			'articles' => 'Articles'
+		]);
+		$classmap = Connection::getInstance()->getClassmap();
+		$this->assertEquals([ 'articles' => 'Articles' ], $classmap);
+
+		Connection::getInstance()->appendClassmap([
+			'photos' => 'Photos'
+		]);
+		$classmap = Connection::getInstance()->getClassmap();
+		$this->assertEquals([ 'articles' => 'Articles', 'photos' => 'Photos' ], $classmap);
+    }
 
 	protected function getUserValues($data=array())
 	{

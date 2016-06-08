@@ -236,41 +236,33 @@ class Connection
             ),
         ));
 
-        // $sequence = $collection->findAndModify(
-        //     array('_id' => $name),
-        //     array('$inc' => array("seq" => 1)),
-        //     null,
-        //     array(
-        //         "new" => true,
-        //     )
-        // );
-
-//         // fetch from the sequences collection
-//         $sequences = $this->getDatabase()->selectCollection('sequences')->findOne();
-//
-//         // if not found, create new
-//         if (is_null($sequences)) { // document not found, insert
-//
-//             $sequences = array(
-//                 $collectionName => 1,
-//             );
-//
-//             $this->getDatabase()->selectCollection('sequences')->insert($sequences);
-//
-//         } elseif (! isset($sequences[$collectionName])) { // document found, but collection name missing
-// var_dump($sequences); exit;
-//             $query = array(
-//                 '_id' => $sequences['_id'],
-//             );
-//
-//             $sequences = array(
-//                 $collectionName => 1,
-//             );
-//
-//             $this->getDatabase()->selectCollection('sequences')->update($query, $sequences);
-//
-//         }
-
         return $sequence[$name];
+    }
+
+    /**
+     * Get the classmap
+     * @return array
+     */
+    public function getClassMap()
+    {
+        return $this->options['classmap'];
+    }
+
+    /**
+     * Get the classmap
+     * @param array $classmap
+     */
+    public function setClassMap($classmap)
+    {
+        $this->options['classmap'] = $classmap;
+    }
+
+    /**
+     * Append more classmaps to the existing classmap
+     * @param array $classmap
+     */
+    public function appendClassMap($classmap)
+    {
+        $this->options['classmap'] = array_merge($this->options['classmap'], $classmap);
     }
 }

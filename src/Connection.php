@@ -26,9 +26,7 @@ class Connection
 	 * Options e.g. database, user, password, etc
 	 * @var array
 	 */
-	private $options = array(
-        'classmap' => array(),
-    );
+	private $options = [];
 
     /**
 	 * Database can be set here, also useful for running tests (mocking)
@@ -56,6 +54,11 @@ class Connection
             'db',
             'classmap',
         ) ));
+
+        // ensure an empty classmap exists
+        $this->options = array_merge([
+            'classmap' => [],
+        ], $this->options);
 
         // prepare the options for
         $mongoOptions = array_intersect_key($options, array_flip( array(
@@ -261,7 +264,7 @@ class Connection
      * Append more classmaps to the existing classmap
      * @param array $classmap
      */
-    public function appendClassMap($classmap)
+    public function appendClassMap($classmap=array())
     {
         $this->options['classmap'] = array_merge($this->options['classmap'], $classmap);
     }

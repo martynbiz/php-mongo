@@ -260,6 +260,17 @@ abstract class Mongo //implements \ArrayAccess
 
 	/**
 	 * @param array $query
+	 * @param array $options
+	 * @return array
+	 */
+	public static function count($query=array(), $options=array())
+	{
+		// TODO this ought to use count() function, not find
+		return count(self::find($query, $options));
+	}
+
+	/**
+	 * @param array $query
 	 * @return array $options
 	 * @return Mongo
 	 */

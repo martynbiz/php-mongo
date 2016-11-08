@@ -1,5 +1,8 @@
 <?php
 
+use MongoDB\BSON\ObjectID;
+use MongoDB\BSON\UTCDateTime;
+
 use MartynBiz\Mongo\Exception\MissingId;
 use MartynBiz\Mongo\MongoIterator;
 
@@ -9,7 +12,7 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -33,7 +36,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -47,7 +50,7 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -71,7 +74,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -87,10 +90,10 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$friend = new UserUnit();
-		$friend->_id = new \MongoId();
+		$friend->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -114,7 +117,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -128,13 +131,13 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$friend = new UserUnit();
-		$friend->_id = new \MongoId();
+		$friend->_id = new ObjectID();
 
 		$enemy = new UserUnit();
-		$enemy->_id = new \MongoId();
+		$enemy->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -163,7 +166,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -178,10 +181,10 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$friend = new UserUnit();
-		$friend->_id = new \MongoId();
+		$friend->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -205,7 +208,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -221,10 +224,10 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$friend = new UserUnit();
-		$friend->_id = new \MongoId();
+		$friend->_id = new ObjectID();
 
 		$friends = new MongoIterator(array(
 			$friend,
@@ -252,7 +255,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -266,7 +269,7 @@ class MongoPushTest extends MongoTestAbstract
     {
 		// the return value from the find
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->at(0) )
@@ -288,7 +291,7 @@ class MongoPushTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array(
 				'$set' => array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)
 			), array() );
 
@@ -308,7 +311,7 @@ class MongoPushTest extends MongoTestAbstract
 	public function testPushWhenIdMissingThrowException()
     {
 		$user = new UserUnit();
-		// $user->_id = new \MongoId();
+		// $user->_id = new ObjectID();
 
 		$this->connectionMock
 			->expects( $this->never() )

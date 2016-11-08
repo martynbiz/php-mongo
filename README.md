@@ -392,3 +392,4 @@ class User extends Mongo
 
 TODO
 * dot syntax support? find(array('model.name' => 'Martyn')), set/get(array(model.name' => 'Martyn'))
+* test multiple connections?

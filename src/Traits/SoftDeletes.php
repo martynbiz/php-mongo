@@ -2,6 +2,8 @@
 
 namespace MartynBiz\Mongo\Traits;
 
+use MongoDB\BSON\UTCDateTime;
+
 use MartynBiz\Mongo\Connection;
 
 /**
@@ -25,7 +27,7 @@ trait SoftDeletes
 
         // append deleted_at date
         $values = array(
-            'deleted_at' => new \MongoDate(time()),
+            'deleted_at' => new UTCDateTime(time()),
         );
 
         $options = array(

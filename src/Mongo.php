@@ -10,6 +10,10 @@ namespace MartynBiz\Mongo;
  * Abstract class for creating mongo models
  */
 
+use MongoDB\BSON\ObjectID;
+use MongoDB\BSON\UTCDateTime;
+
+use MartynBiz\Mongo\MongoDBRef;
 use MartynBiz\Mongo\Connection;
 use MartynBiz\Mongo\Utils;
 use MartynBiz\Mongo\MongoIterator;
@@ -127,14 +131,14 @@ abstract class Mongo implements \ArrayAccess
 		$value = @$this->data[$name];
 
 		// if value of $name is a dbref, then convert it to it's object
-		if (\MongoDBRef::isRef($value)) {
+		if (MongoDBRef::isRef($value)) {
 
 			$dbref = $value;
 
 			// we have the data for the ref, but connection has the classmap
 			$className = Connection::getInstance(self::$conn)->getCollectionClassNameFromClassMap($dbref['$ref']);
 			$value = new $className();
-
+// var_dump($dbref); exit;
 			$value->load(array(
 				'_id' => $dbref['$id'],
 			));
@@ -146,9 +150,9 @@ abstract class Mongo implements \ArrayAccess
 
 		// if value is an array, it is possibly an array of DBRefs. In which case we
 		// should convert to models
-		if (is_array($value) and !\MongoDBRef::isRef($value)) {
+		if (is_array($value) and !MongoDBRef::isRef($value)) {
 			array_walk($value, function (&$item, $key) use ($name) {
-				if (\MongoDBRef::isRef($item)) {
+				if (MongoDBRef::isRef($item)) {
 					$dbref = $item;
 
 					// we have the data for the ref, but connection has the classmap
@@ -422,7 +426,7 @@ abstract class Mongo implements \ArrayAccess
 			// values
 			$values = array(
 				'$set' => array_merge($values, array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)),
 			);
 			unset($values['$set']['_id']); // don't need this
@@ -440,7 +444,7 @@ abstract class Mongo implements \ArrayAccess
 
 			// append created_at date
 			$values = array_merge($values, array(
-				'created_at' => new \MongoDate(time()),
+				'created_at' => new UTCDateTime(time()),
 			));
 
 			// insert - will return _id for us too
@@ -522,7 +526,7 @@ abstract class Mongo implements \ArrayAccess
 			'_id' => $this->data['_id'],
 		), array(
 			'$set' => array(
-				'updated_at' => new \MongoDate( time() )
+				'updated_at' => new UTCDateTime( time() )
 			),
 		));
 
@@ -579,7 +583,7 @@ abstract class Mongo implements \ArrayAccess
 	 */
 	public function getDBRef()
 	{
-		return \MongoDBRef::create(static::$collection, $this->_id);
+		return MongoDBRef::create(static::$collection, $this->_id);
 	}
 
 	/**
@@ -596,7 +600,7 @@ abstract class Mongo implements \ArrayAccess
 
 		// look for
 		foreach ($values as $name => &$value) {
-			if ($value instanceof \MongoId) {
+			if ($value instanceof ObjectID) {
 				$value = $value->__toString();
 			} elseif ($value instanceof Mongo) {
 				if ($deep > 0) {
@@ -604,7 +608,7 @@ abstract class Mongo implements \ArrayAccess
 				} else {
 					$value = '...';
 				}
-			} elseif (\MongoDBRef::isRef($value)) {
+			} elseif (MongoDBRef::isRef($value)) {
 				if ($deep > 0) {
 					$value = Connection::getInstance(self::$conn)->findOne($value['$ref'], array(
 						'_id' => $value['$id'],

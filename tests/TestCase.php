@@ -1,12 +1,14 @@
 <?php
 
+use MongoDB\BSON\ObjectID;
+
 abstract class TestCase extends PHPUnit_Framework_TestCase
 {
 	protected function getUserData($data=array(), $withId=true)
 	{
 		// set mongoid
 		if ($withId) $data = array_merge(array(
-				'_id' => new \MongoId(),
+				'_id' => new ObjectID(),
 			), $data);
 
 		return array_merge(array(
@@ -21,7 +23,7 @@ abstract class TestCase extends PHPUnit_Framework_TestCase
 	{
 		// set mongoid
 		if ($withId) $data = array_merge(array(
-				'_id' => new \MongoId(),
+				'_id' => new ObjectID(),
 			), $data);
 
 		return  array_merge(array(

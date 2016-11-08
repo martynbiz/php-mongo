@@ -1,5 +1,10 @@
 <?php
 
+use MongoDB\BSON\ObjectID;
+use MongoDB\BSON\UTCDateTime;
+
+use MartynBiz\Mongo\MongoDBRef;
+
 class MongoSaveTest extends MongoTestAbstract
 {
 	public function testSaveReturnsFalseWhenValidationFails()
@@ -24,7 +29,7 @@ class MongoSaveTest extends MongoTestAbstract
 		$collectionName = 'users';
 		$userData = array(
 			'name' => 'Martyn',
-			'created_at' => new \MongoDate(time()),
+			'created_at' => new UTCDateTime(time()),
 		);
 
 		$this->connectionMock
@@ -47,7 +52,7 @@ class MongoSaveTest extends MongoTestAbstract
 		$values = array(
 			'name' => $usersData['name'],
 			'email' => $usersData['email'],
-			'created_at' => new \MongoDate(time()),
+			'created_at' => new UTCDateTime(time()),
 		);
 
 		$this->connectionMock
@@ -84,10 +89,10 @@ class MongoSaveTest extends MongoTestAbstract
 			->method('insert')
 			->with('articles', array(
 				'tags' => array(
-					\MongoDBRef::create('tags', $tagsData[0]['_id']),
-					\MongoDBRef::create('tags', $tagsData[1]['_id']),
+					MongoDBRef::create('tags', $tagsData[0]['_id']),
+					MongoDBRef::create('tags', $tagsData[1]['_id']),
 				),
-				'created_at' => new \MongoDate(time()),
+				'created_at' => new UTCDateTime(time()),
 			))
 			->willReturn($tagsData);
 
@@ -119,7 +124,7 @@ class MongoSaveTest extends MongoTestAbstract
 		// we'll remove the invalid one, and add additional ones such as created_at
 		$values = $usersData;
 		unset($values['invalid']);
-		$values['created_at'] = new \MongoDate(time());
+		$values['created_at'] = new UTCDateTime(time());
 
 		$this->connectionMock
 			->expects( $this->once() )
@@ -150,7 +155,7 @@ class MongoSaveTest extends MongoTestAbstract
 			->expects( $this->once() )
 			->method('insert')
 			->with( 'users', array_merge($userData, array(
-				'created_at' => new \MongoDate(time()),
+				'created_at' => new UTCDateTime(time()),
 			)) );
 
 
@@ -171,7 +176,7 @@ class MongoSaveTest extends MongoTestAbstract
 			'name' => 'Neil',
 			'email' => 'neil@example.com',
 		) ) );
-		$friend->_id = new \MongoId();
+		$friend->_id = new ObjectID();
 
 
 		// ================
@@ -183,8 +188,8 @@ class MongoSaveTest extends MongoTestAbstract
 			->with( 'users', array(
 				'name' => 'Martyn',
 				'email' => 'martyn@example.com',
-				'friend' => \MongoDBRef::create('users', $friend->_id),
-				'created_at' => new \MongoDate(time()),
+				'friend' => MongoDBRef::create('users', $friend->_id),
+				'created_at' => new UTCDateTime(time()),
 			) );
 
 		$user = new UserUnit(array(
@@ -209,7 +214,7 @@ class MongoSaveTest extends MongoTestAbstract
 		// is required to ensure it's an update() - not a insert() .. usually
 		// this would be set internally by load() during a find/findOne() call
 		$user = new UserUnit();
-		$user->_id = new \MongoId();
+		$user->_id = new ObjectID();
 
 		// this is the data we'll pass to save()
 		$saveData = $this->getUserData(array(), false); // no _id
@@ -225,7 +230,7 @@ class MongoSaveTest extends MongoTestAbstract
 				'_id' => $user->_id,
 			), array( // update values
 				'$set' => array_merge($saveData, array(
-					'updated_at' => new \MongoDate(time()),
+					'updated_at' => new UTCDateTime(time()),
 				)),
 			), array( // options
 				'multi' => false,
@@ -250,8 +255,8 @@ class MongoSaveTest extends MongoTestAbstract
 
 	public function testToArrayWithArray()
     {
-		$id = new \MongoId('51b14c2de8e185801f000000');
-		$dbref = \MongoDBRef::create('users', '51b14c2de8e185801f000001');
+		$id = new ObjectID('51b14c2de8e185801f000000');
+		$dbref = MongoDBRef::create('users', '51b14c2de8e185801f000001');
 		$user = new UserUnit( array(
 			'name' => 'Martyn',
 		) );

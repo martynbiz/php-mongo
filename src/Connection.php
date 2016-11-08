@@ -2,6 +2,10 @@
 
 namespace MartynBiz\Mongo;
 
+use MongoDB\Client as MongoClient;
+use MongoDB\BSON\ObjectID;
+use MongoDB\Database;
+
 use MartynBiz\Mongo\Traits\Singleton as SingletonTrait;
 
 /**
@@ -12,23 +16,23 @@ class Connection
 {
     use SingletonTrait;
 
-    /**
-	 * @var MongoClient
-	 */
-    private $client;
+//     /**
+// 	 * @var MongoClient
+// 	 */
+//     private $client;
 
 	/**
 	 * @var MongoDB
 	 */
     private $db;
 
-	/**
-	 * Options e.g. database, user, password, etc
-	 * @var array
-	 */
-	private $options = array(
-        'classmap' => array(),
-    );
+// 	/**
+// 	 * Options e.g. database, user, password, etc
+// 	 * @var array
+// 	 */
+// 	private $options = array(
+//         'classmap' => array(),
+//     );
 
     /**
 	 * Database can be set here, also useful for running tests (mocking)
@@ -66,19 +70,9 @@ class Connection
         ) ));
 
         // $this->client = new \MongoClient($uri, $mongoOptions);
-        $this->client = new \MongoClient($uri, $mongoOptions);
+        $this->client = new MongoClient($uri, $mongoOptions);
 
         return $this;
-	}
-
-	/**
-	 * Database can be set here, also useful for running tests (mocking)
-	 * @param MongoDB
-	 * @return void
-	 */
-	public function setDatabase(\MongoDB $db)
-	{
-		$this->db = $db;
 	}
 
 	/**
@@ -88,11 +82,21 @@ class Connection
 	 */
 	public function getDatabase()
 	{
-		if (!$this->db instanceof \MongoDB) {
-			$this->db = $this->client->selectDB( $this->options['db'] );
+		if (!$this->db instanceof Database) {
+			$this->db = $this->client->selectDatabase( $this->options['db'] );
 		}
 
 		return $this->db;
+	}
+
+	/**
+	 * Database can be set here, also useful for running tests (mocking)
+	 * @param MongoDB
+	 * @return void
+	 */
+	public function setDatabase(Database $db)
+	{
+		$this->db = $db;
 	}
 
 	/**
@@ -100,7 +104,7 @@ class Connection
      * @param string $collection
  	 * @param array $query
  	 * @param array $options
-	 * @return void
+	 * @return array
 	 */
 	public function find($collection, $query=array(), $options=array())
 	{
@@ -120,8 +124,6 @@ class Connection
         if (isset($options['skip'])) {
             $result = $result->skip((int) $options['skip']);
         }
-
-        // $total = $result->count();
 
         return $result;
 	}
@@ -149,7 +151,7 @@ class Connection
 	{
         // our hash mongo id, this will be set to
         if (! isset($values['_id']))
-            $values['_id'] = new \MongoId();
+            $values['_id'] = new ObjectID();
 
         // this is an auto-increment id
         if (! isset($values['id']))
@@ -157,7 +159,7 @@ class Connection
 
         $collection = $this->getDatabase()->selectCollection($collectionName);
 
-        $result = $collection->insert($values);
+        $result = $collection->insertOne($values);
 
         return $result;
 	}
@@ -172,9 +174,18 @@ class Connection
 	 */
 	public function update($collectionName, $query, $values, $options=array())
 	{
+        // default options
+        $options = array_merge(array(
+            'multi' => false,
+        ), $options);
+
         $collection = $this->getDatabase()->selectCollection($collectionName);
 
-        return $collection->update($query, $values, $options);
+        if ($options['multi']) {
+            return $collection->updateMany($query, $values);
+        } else {
+            return $collection->updateOne($query, $values);
+        }
 	}
 
 	/**
@@ -186,9 +197,18 @@ class Connection
 	 */
 	public function delete($collectionName, $query, $options=array())
 	{
+        // default options
+        $options = array_merge(array(
+            'multi' => false,
+        ), $options);
+
         $collection = $this->getDatabase()->selectCollection($collectionName);
 
-        return $collection->remove($query, $options);
+        if ($options['multi']) {
+            return $collection->deleteMany($query);
+        } else {
+            return $collection->deleteOne($query);
+        }
 	}
 
 	/**
@@ -218,7 +238,7 @@ class Connection
 
         $collection = $this->getDatabase()->selectCollection('sequences');
 
-        $collection->update(
+        $collection->updateOne(
             array(
                 $name => array('$exists' => true),
             ),

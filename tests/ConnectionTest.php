@@ -2,9 +2,11 @@
 
 use MartynBiz\Mongo\Connection;
 
+use MongoDB\BSON\ObjectID;
+use MongoDB\Database;
+
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {
-
 	/**
 	 * @var Connection
 	 */
@@ -16,18 +18,17 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 	protected $dbMock;
 
 	/**
-	 *
 	 * @var MongoCollection_Mock
 	 */
 	protected $collectionMock;
 
 	public function setup()
 	{
-		$this->dbMock = $this->getMockBuilder('MongoDB')
+		$this->dbMock = $this->getMockBuilder('MongoDB\Database')
 			->disableOriginalConstructor()
 			->getMock();
 
-		$this->collectionMock = $this->getMockBuilder('MongoCollection')
+		$this->collectionMock = $this->getMockBuilder('MongoDB\Collection')
 			->disableOriginalConstructor()
 			->getMock();
 
@@ -41,6 +42,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 
 		// set options such as classmap
 		Connection::getInstance()->init( array(
+			'db' => 'test',
 			'classmap' => array(
 				'users' => 'User',
 			),
@@ -52,12 +54,17 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->connection = Connection::getInstance();
 	}
 
-	public function testInstantiation()
+	public function test_instantiation()
     {
         $this->assertTrue($this->connection instanceof Connection);
     }
 
-	public function testMultipleInstances()
+	public function test_get_database_returns_database_object()
+    {
+        $this->assertTrue($this->connection->getDatabase() instanceof Database);
+    }
+
+	public function test_multiple_instances()
     {
 		$conn1 = Connection::getInstance('conn1')->init( array(
 			'classmap' => array(
@@ -76,7 +83,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->assertNotEquals(spl_object_hash($conn1), spl_object_hash($conn2));
     }
 
-	public function testFindReturnsArray()
+	public function test_find_returns_array()
     {
 		$collection = 'users';
 
@@ -102,12 +109,11 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$result = $this->connection->find($collection, $query, $options);
 
 		// assertions
-
 		$this->assertEquals(count($usersData), count($result));
 		$this->assertEquals($result[0]['name'], $usersData[0]['name']);
     }
 
-	public function testFindOneReturnsArray()
+	public function test_find_one_returns_array()
     {
 		$collection = 'users';
 
@@ -129,20 +135,18 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$result = $this->connection->findOne($collection, $query, $options);
 
 		// assertions
-
 		$this->assertEquals($result['name'], $userData['name']);
     }
 
-	public function testGetCollectionClassNameFromClassMap()
+	public function test_get_collection_class_name_from_class_map()
     {
 		$class = $this->connection->getCollectionClassNameFromClassMap('users');
 
 		// assertions
-
 		$this->assertEquals('User', $class);
     }
 
-	public function testInsertCallsMongoDBInsertWithMongoIdAsArgument()
+	public function test_insert_calls_insert_with_object_id()
     {
 		$collectionName = 'users';
 		$values = $this->getUserValues(array(
@@ -151,7 +155,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 
 		$this->collectionMock
 			->expects( $this->once() )
-			->method('insert')
+			->method('insertOne')
 			->with($values);
 
 		$this->collectionMock
@@ -164,48 +168,78 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 		$this->connection->insert($collectionName, $values);
     }
 
-	public function testUpdateCallsMongoDBUpdate()
+	public function test_update_calls_update_one_method()
     {
 		$collectionName = 'users';
 		$query = array(
 			'$id' => '1234567890'
 		);
 		$values = $this->getUserValues();
-		$options = array(
-			'multi' => true,
-		);
 
 		$this->collectionMock
 			->expects( $this->once() )
-			->method('update')
-			->with($query, $values, $options);
+			->method('updateOne')
+			->with($query, $values);
 
-		$this->connection->update($collectionName, $query, $values, $options);
+		$this->connection->update($collectionName, $query, $values);
     }
 
-	// public function testUpdateNeverCallsMongoDBUpdateWhenValuesEmpty()
-    // {
-	// 	$collectionName = 'users';
-	// 	$query = array(
-	// 		'$id' => '1234567890'
-	// 	);
-	// 	$values = array();
-	// 	$options = array(
-	// 		'multi' => true,
-	// 	);
-	//
-	// 	$this->collectionMock
-	// 		->expects( $this->never() )
-	// 		->method('update')
-	// 		->with($query, $values, $options);
-	//
-	// 	$this->connection->update($collectionName, $query, $values, $options);
-    // }
+	public function test_update_calls_update_many_method()
+    {
+		$collectionName = 'users';
+		$query = array(
+			'$id' => '1234567890'
+		);
+		$values = $this->getUserValues();
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('updateMany')
+			->with($query, $values);
+
+		$this->connection->update($collectionName, $query, $values, [
+			'multi' => true,
+		]);
+    }
+
+	public function test_delete_calls_delete_one_method()
+    {
+		$collectionName = 'users';
+		$query = array(
+			'$id' => '1234567890'
+		);
+		$values = $this->getUserValues();
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('deleteOne')
+			->with($query);
+
+		$this->connection->delete($collectionName, $query);
+    }
+
+	public function test_delete_calls_delete_many_method()
+    {
+		$collectionName = 'users';
+		$query = array(
+			'$id' => '1234567890'
+		);
+		$values = $this->getUserValues();
+
+		$this->collectionMock
+			->expects( $this->once() )
+			->method('deleteMany')
+			->with($query);
+
+		$this->connection->delete($collectionName, $query, [
+			'multi' => true,
+		]);
+    }
 
 	protected function getUserValues($data=array())
 	{
 		return array_merge(array(
-			'_id' => new MongoId('51b14c2de8e185801f000000'),
+			'_id' => new ObjectID('51b14c2de8e185801f000000'),
 			'name' => 'Martyn',
 			'email' => 'martyn@example.com',
 		), $data);

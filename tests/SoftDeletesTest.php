@@ -3,6 +3,9 @@
 // TODO test when app sets id and _id for insert
 // TODO test set can accept an array too
 
+use MongoDB\BSON\ObjectID;
+use MongoDB\BSON\UTCDateTime;
+
 use MartynBiz\Mongo\Mongo;
 use MartynBiz\Mongo\Connection;
 use MartynBiz\Mongo\Traits\SoftDeletes;
@@ -74,7 +77,7 @@ class SoftDeletesTest extends PHPUnit_Framework_TestCase
 		);
 
 		$values = array(
-			'deleted_at' => new \MongoDate(time()),
+			'deleted_at' => new UTCDateTime(time()),
 		);
 
 		$options = array(
@@ -158,7 +161,7 @@ class SoftDeletesTest extends PHPUnit_Framework_TestCase
 	protected function getUserData($data=array())
 	{
 		return array_merge(array(
-			'_id' => new MongoId('51b14c2de8e185801f000000'),
+			'_id' => new ObjectID('51b14c2de8e185801f000000'),
 			'name' => 'Martyn Bissett',
 			'first_name' => 'Martyn',
 			'last_name' => 'Bissett',
